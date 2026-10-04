@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cebimon — Teknik Bülten (Saha Doğrulamalı Mimari & Kılavuz)</title>
+  <meta name="description" content="Redmi Note 8 ve Termux üzerinde 72+ saat çalışan, Baresip VoIP köprülü, Fish Audio klon sesli ve sıfır terminal mobil kokpitli kişisel asistan." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+  <style>
+    *,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb;margin:0;padding:0}
+    :root{
+      --bg-kagit: #F4EFE6;
+      --bg-kart: #EAE2D4;
+      --bg-kart-koyu: #E7DFD1;
+      --murekkep: #171412;
+      --kiremit: #D2451E;
+      --kizil: #8E2A10;
+      --kenar: rgba(23, 20, 18, 0.15);
+      --kenar-koyu: rgba(23, 20, 18, 0.25);
+    }
+    html{
+      scroll-behavior: smooth;
+      background-color: var(--bg-kagit);
+      color: var(--murekkep);
+      font-family: "Newsreader", Georgia, serif;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+    body{min-height: 100vh;}
+    .font-mono{font-family: "IBM Plex Mono", ui-monospace, monospace;}
+    .font-serif{font-family: "Newsreader", Georgia, serif;}
+    
+    ::selection{background-color: rgba(210, 69, 30, 0.25);}
+    ::-webkit-scrollbar{height: 6px; width: 6px;}
+    ::-webkit-scrollbar-track{background: var(--bg-kagit);}
+    ::-webkit-scrollbar-thumb{background: rgba(23, 20, 18, 0.2); border-radius: 999px;}
+
+    /* Genel Konteyner */
+    .konteyner{max-width: 1280px; margin-left: auto; margin-right: auto; padding-left: 20px; padding-right: 20px;}
+    @media (min-width: 768px){.konteyner{padding-left: 32px; padding-right: 32px;}}
+
+    /* Rozetler */
+    .rozet{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 9999px;
+      border: 1px solid rgba(23, 20, 18, 0.2);
+      background: transparent;
+      color: var(--murekkep);
+      padding: 3px 10px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      line-height: 1;
+      text-decoration: none;
+    }
+    .rozet.koyu{background: var(--murekkep); color: var(--bg-kagit); border-color: var(--murekkep);}
+    .rozet.vurgu{background: var(--kizil); color: #fff; border-color: var(--kizil);}
+
+    /* Üst Sabit Bar */
+    header.ust-bar{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid var(--kenar);
+      background: rgba(244, 239, 230, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .ust-bar-icerik{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+
+    /* Hero Bölümü */
+    .hero-grid{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      padding-top: 40px;
+      padding-bottom: 40px;
+    }
+    @media (min-width: 1024px){
+      .hero-grid{grid-template-columns: 8fr 4fr; padding-top: 64px;}
+    }
+
+    .baslik-ana{
+      font-family: "Newsreader", serif;
+      font-weight: 700;
+      line-height: 0.9;
+      letter-spacing: -0.04em;
+    }
+    .baslik-ana .satir-1{display: block; font-size: clamp(44px, 8.5vw, 104px);}
+    .baslik-ana .satir-2{display: block; color: var(--kiremit); font-size: clamp(44px, 8.5vw, 104px);}
+
+    .hero-ozet{
+      margin-top: 24px;
+      max-width: 58ch;
+      font-size: 18px;
+      line-height: 1.45;
+      color: rgba(23, 20, 18, 0.85);
+    }
+    @media (min-width: 768px){.hero-ozet{font-size: 20px;}}
+
+    .buton-grubu{
+      margin-top: 32px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      max-width: 560px;
+    }
+    @media (min-width: 640px){.buton-grubu{grid-template-columns: repeat(2, 1fr);}}
+    @media (min-width: 1024px){.buton-grubu{grid-template-columns: repeat(3, 1fr);}}
+
+    .bulten-btn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 9999px;
+      padding: 10px 16px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .bulten-btn.ana{background: var(--murekkep); color: var(--bg-kagit);}
+    .bulten-btn.ana:hover{background: #000;}
+    .bulten-btn.ikincil{border: 1px solid var(--kenar-koyu); background: var(--bg-kart); color: var(--murekkep);}
+    .bulten-btn.ikincil:hover{background: var(--bg-kart-koyu);}
+    .bulten-btn.seffaf{border: 1px solid var(--kenar-koyu); background: transparent; color: var(--murekkep);}
+    .bulten-btn.seffaf:hover{background: var(--bg-kart);}
+
+    /* Hero Yan Sürüm Kartı */
+    .surum-kart{
+      border-radius: 8px;
+      border: 1px solid var(--murekkep);
+      background: var(--bg-kart);
+      padding: 20px;
+      box-shadow: 4px 4px 0 var(--murekkep);
+    }
+    .surum-kutucuk{
+      border-radius: 6px;
+      border: 1px solid var(--kenar);
+      background: var(--bg-kagit);
+      padding: 14px;
+      margin-top: 14px;
+    }
+
+    /* Saha Doğrulama Şeridi */
+    .dogrulama-seridi{
+      border-top: 1px solid var(--murekkep);
+      border-bottom: 1px solid var(--murekkep);
+      background: linear-gradient(to right, #EAE2D4, #E9DDC8, #D9CBB6);
+      padding: 28px 0;
+    }
+    .dogrulama-grid{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    @media (min-width: 768px){.dogrulama-grid{grid-template-columns: 4fr 8fr;}}
+    .damga{
+      display: inline-flex;
+      transform: rotate(-1.5deg);
+      align-items: center;
+      gap: 12px;
+      border-radius: 2px;
+      border: 2px solid var(--kizil);
+      background: var(--bg-kagit);
+      padding: 8px 16px;
+      box-shadow: 3px 3px 0 var(--kizil);
+    }
+    .damga-nokta{
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      background: var(--kiremit);
+      animation: nabiz 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes nabiz{50%{opacity: 0.4;}}
+
+    /* Ana Düzen (Sidebar + İçerik) */
+    .icerik-duzeni{
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      padding-top: 40px;
+      padding-bottom: 60px;
+    }
+    @media (min-width: 1024px){
+      .icerik-duzeni{flex-direction: row; gap: 48px; padding-top: 56px;}
+    }
+
+    /* Sol Fihrist (Sticky Sidebar) */
+    aside.fihrist-alan{
+      width: 100%;
+    }
+    @media (min-width: 1024px){
+      aside.fihrist-alan{width: 220px; flex-shrink: 0;}
+      .fihrist-sabit{position: sticky; top: 76px;}
+    }
+    .fihrist-nav{
+      display: flex;
+      flex-direction: row;
+      gap: 4px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+    @media (min-width: 1024px){
+      .fihrist-nav{flex-direction: column; overflow-x: visible; padding-bottom: 0;}
+    }
+    .fihrist-link{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      text-align: left;
+      border-radius: 4px;
+      padding: 6px 8px;
+      color: rgba(23, 20, 18, 0.85);
+      text-decoration: none;
+      font-size: 13.5px;
+      line-height: 1.25;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    @media (min-width: 1024px){.fihrist-link{white-space: normal;}}
+    .fihrist-link:hover{background: var(--bg-kart);}
+    .fihrist-link.aktif{background: var(--murekkep); color: var(--bg-kagit);}
+    .fihrist-link .num{
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--kizil);
+    }
+    .fihrist-link.aktif .num{color: rgba(244, 239, 230, 0.7);}
+
+    /* Bölüm Başlıkları & Öğeleri */
+    .bolum-blok{scroll-margin-top: 96px;}
+    .bolum-ayirici{height: 1px; width: 100%; background: var(--kenar-koyu); margin: 56px 0;}
+    .bolum-baslik-satir{display: flex; align-items: baseline; gap: 14px;}
+    .bolum-numara{font-family: "IBM Plex Mono", monospace; font-size: 13px; letter-spacing: 0.1em; color: var(--kizil); font-weight: 600;}
+    .bolum-baslik{
+      font-family: "Newsreader", serif;
+      font-size: clamp(26px, 4vw, 32px);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+    .bolum-cizgi{margin-top: 10px; height: 1px; width: 100%; background: var(--kenar);}
+
+    /* Kod Blokları & Tablolar */
+    pre.kod-blok{
+      margin-top: 16px;
+      overflow-x: auto;
+      border-radius: 4px;
+      border: 1px solid var(--kenar);
+      background: var(--bg-kart-koyu);
+      padding: 16px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: var(--murekkep);
+    }
+    .tablo-sarmal{
+      margin-top: 20px;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid var(--kenar);
+    }
+    table.bulten-tablo{width: 100%; border-collapse: collapse; text-align: left;}
+    table.bulten-tablo th{
+      padding: 10px 16px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid var(--kenar);
+    }
+    table.bulten-tablo td{
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(23, 20, 18, 0.08);
+      font-size: 13.5px;
+      line-height: 1.45;
+    }
+    table.bulten-tablo tr:nth-child(even){background: rgba(234, 226, 212, 0.4);}
+    table.bulten-tablo tr:nth-child(odd){background: var(--bg-kagit);}
+
+    .kart-grid-3{display: grid; grid-template-columns: 1fr; gap: 14px;}
+    @media (min-width: 768px){.kart-grid-3{grid-template-columns: repeat(3, 1fr);}}
+    .kart-grid-2{display: grid; grid-template-columns: 1fr; gap: 14px;}
+    @media (min-width: 768px){.kart-grid-2{grid-template-columns: repeat(2, 1fr);}}
+
+    .kart-kutucuk{
+      border-radius: 6px;
+      border: 1px solid var(--kenar);
+      background: rgba(234, 226, 212, 0.6);
+      padding: 16px;
+    }
+    .kart-kutucuk.beyaz{background: var(--bg-kagit);}
+    .kart-kutucuk.kirmizi{border-color: rgba(142, 42, 16, 0.3); background: rgba(142, 42, 16, 0.05);}
+    .etiket-vurgu{font-family: "IBM Plex Mono", monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--kizil); font-weight: 600;}
+
+    /* Alıntı & SSS */
+    .sss-oge{border-left: 2px solid rgba(210, 69, 30, 0.6); padding-left: 16px; margin-bottom: 20px;}
+    .sss-soru{font-weight: 700; font-size: 15.5px;}
+    .sss-cevap{margin-top: 4px; font-size: 14px; color: rgba(23, 20, 18, 0.8); line-height: 1.55;}
+  </style>
+</head>
+<body>
+
+  <!-- ─── ÜST SABİT BİLGİ BARI ─── -->
+  <header class="ust-bar">
+    <div class="konteyner ust-bar-icerik">
+      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+        <span class="rozet koyu">Açık Kaynak · MIT</span>
+        <span class="rozet">Root'suz Termux Native</span>
+        <span class="rozet">Android 7+ · arm64</span>
+        <span class="rozet vurgu">Saha Doğrulamalı</span>
+      </div>
+      <div class="font-mono" style="font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:rgba(23,20,18,0.7);">
+        Teknik Bülten · v0.1.0 Canlı Sistem · 2026
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── HERO ALANI ─── -->
+  <div class="konteyner">
+    <div class="hero-grid">
+      <div>
+        <h1 class="baslik-ana">
+          <span class="satir-1">Asistanım</span>
+          <span class="satir-2">Cebimde</span>
+        </h1>
+        <p class="hero-ozet">
+          Çekmecede duran eski bir Android telefonu (Redmi Note 8), Termux üzerinde çalışan, 
+          <strong>Zadarma VoIP/SIP santral köprülü</strong>, <strong>Fish Audio klon sesli</strong> ve 
+          <strong>sıfır terminal mobil kokpitli</strong> 7/24 kişisel asistana dönüştüren açık kaynak mimari.
+          <br>
+          <span class="font-mono" style="font-size:12px; color:rgba(23,20,18,0.65); display:inline-block; margin-top:6px;">
+            Redmi Note 8 sahada 72+ saat kesintisiz doğrulandı — şarjda, Wi-Fi'da, arka planda.
+          </span>
+        </p>
+
+        <!-- Eylem Butonları -->
+        <div class="buton-grubu">
+          <a href="https://github.com/AppleCurse/asistanim-cebimde-cebimon" target="_blank" class="bulten-btn ana">
+            📦 GitHub Deposu
+          </a>
+          <a href="#bolum-06" class="bulten-btn ikincil">
+            🛠 Kurulum Adımları
+          </a>
+          <a href="#bolum-07" class="bulten-btn seffaf">
+            📱 Mobil Kokpit
+          </a>
+          <a href="#bolum-10" class="bulten-btn seffaf">
+            🩺 Sorun Giderme
+          </a>
+          <a href="#hero-dogrulama" class="bulten-btn seffaf">
+            ✅ Saha Kanıtları
+          </a>
+          <a href="#bolum-12" class="bulten-btn seffaf">
+            📚 Mimari Ağacı
+          </a>
+        </div>
+
+        <div style="margin-top:28px; display:flex; flex-wrap:wrap; gap:12px;" class="font-mono">
+          <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(23,20,18,0.55);">• Sıfır Root</span>
+          <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(23,20,18,0.55);">• Çevrimdışı Bellek</span>
+          <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(23,20,18,0.55);">• Saf Node.js (ws tek bağımlılık)</span>
+          <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(23,20,18,0.55);">• PWA Mobil Kokpit</span>
+        </div>
+      </div>
+
+      <!-- Sürümler & Hızlı Başlatma Kartı -->
+      <div id="surumler">
+        <div class="surum-kart">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span class="font-mono" style="font-size:11.5px; text-transform:uppercase; letter-spacing:0.16em; font-weight:600;">Canlı Dağıtım</span>
+            <span class="rozet koyu">Kararlı v0.1.0</span>
+          </div>
+
+          <div class="surum-kutucuk">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span class="font-mono" style="font-size:13px; font-weight:600;">v0.1.0 (Ana Dal)</span>
+              <span class="font-mono" style="font-size:10.5px; color:rgba(23,20,18,0.6);">2026-10 · origin/main</span>
+            </div>
+            <p style="margin-top:6px; font-size:13.5px; line-height:1.4; color:rgba(23,20,18,0.85);">
+              Sıfır terminal mobil kokpiti, Fish Audio klon ses stüdyosu (Haluk Bilginer, Sedat Peker), Zadarma VoIP köprüsü ve 90 birim test paketi.
+            </p>
+            <div style="margin-top:12px;">
+              <a href="https://github.com/AppleCurse/asistanim-cebimde-cebimon" target="_blank" class="rozet koyu" style="display:inline-flex; width:100%; justify-content:center; padding:8px 0;">
+                Depoyu GitHub'da Görüntüle
+              </a>
+            </div>
+          </div>
+
+          <div style="margin-top:16px; border-top:1px dashed var(--kenar-koyu); padding-top:12px; font-size:11.5px; color:rgba(23,20,18,0.7);" class="font-mono">
+            <div>Hedef: Redmi Note 8 (Termux)</div>
+            <div>Mimari: Saf Node.js + Baresip + Termux:API</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px; border-radius:6px; background:var(--murekkep); color:var(--bg-kagit); padding:16px;">
+          <div class="font-mono" style="font-size:10.5px; text-transform:uppercase; letter-spacing:0.16em; opacity:0.75;">Hızlı Kurulum (Tek Satır)</div>
+          <pre style="margin-top:8px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; line-height:1.55; overflow-x:auto;">git clone https://github.com/AppleCurse/asistanim-cebimde-cebimon.git
+cd asistanim-cebimde-cebimon
+bash scripts/termux/kur.sh
+bash scripts/termux/baslat.sh</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SAHADA DOĞRULAMA ŞERİDİ ─── -->
+  <div id="hero-dogrulama" class="dogrulama-seridi">
+    <div class="konteyner dogrulama-grid">
+      <div>
+        <div class="damga">
+          <div class="damga-nokta"></div>
+          <span class="font-mono" style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.16em; color:var(--kizil);">
+            Sahada Doğrulandı
+          </span>
+        </div>
+        <div class="font-mono" style="margin-top:10px; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:rgba(23,20,18,0.7);">
+          Redmi Note 8 · 72+ Saat Kesintisiz · Termux:Boot
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr; gap:16px;" class="kart-grid-3">
+        <p style="font-size:14px; line-height:1.5; color:rgba(23,20,18,0.9);">
+          <strong>72+ Saat Kesintisiz:</strong> Termux wake-lock ve Termux:Boot kancası ile elektrik kesilip gelse dahi sistem telefon açılır açılmaz kendiliğinden uyanır.
+        </p>
+        <p style="font-size:14px; line-height:1.5; color:rgba(23,20,18,0.9);">
+          <strong>Baresip VoIP Köprüsü:</strong> Zadarma SIP santraline TCP üzerinden bağlanır, FIFO named pipe (spk.raw) ile çift yönlü 8kHz ses iletir.
+        </p>
+        <p style="font-size:14px; line-height:1.5; color:rgba(23,20,18,0.9);">
+          <strong>Yerel Bellek ve Mahremiyet:</strong> Beden sadece 127.0.0.1 dinler. Tüm konuşma geçmişi ve notlar cihaz içinde kalır; dışa sadece onaylanan LLM çağrısı gider.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ANA İÇERİK DÜZENİ ─── -->
+  <div class="konteyner icerik-duzeni">
+
+    <!-- SOL SABİT FİHRİST -->
+    <aside class="fihrist-alan">
+      <div class="fihrist-sabit">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="height:1px; width:20px; background:rgba(23,20,18,0.4);"></span>
+          <span class="font-mono" style="font-size:11px; text-transform:uppercase; letter-spacing:0.2em; font-weight:600;">Fihrist</span>
+        </div>
+
+        <nav class="fihrist-nav" style="margin-top:16px;" id="fihristNav">
+          <a href="#bolum-01" class="fihrist-link"><span class="num">01</span> Bu proje ne işe yarar?</a>
+          <a href="#bolum-02" class="fihrist-link"><span class="num">02</span> Neler yapabilir?</a>
+          <a href="#bolum-03" class="fihrist-link"><span class="num">03</span> Neler yapamaz?</a>
+          <a href="#bolum-04" class="fihrist-link"><span class="num">04</span> Nasıl çalışır? Mimari</a>
+          <a href="#bolum-05" class="fihrist-link"><span class="num">05</span> Donanım ve Gereksinimler</a>
+          <a href="#bolum-06" class="fihrist-link"><span class="num">06</span> Kurulum Adım Adım</a>
+          <a href="#bolum-07" class="fihrist-link"><span class="num">07</span> Sıfır Terminal Mobil Kokpit</a>
+          <a href="#bolum-08" class="fihrist-link"><span class="num">08</span> Ayarlar & API Merkezi</a>
+          <a href="#bolum-09" class="fihrist-link"><span class="num">09</span> Günlük Yönetim Komutları</a>
+          <a href="#bolum-10" class="fihrist-link"><span class="num">10</span> Sorun Giderme Rehberi</a>
+          <a href="#bolum-11" class="fihrist-link"><span class="num">11</span> Güvenlik & İzin Kapıları</a>
+          <a href="#bolum-12" class="fihrist-link"><span class="num">12</span> Depo Dizin Yapısı</a>
+          <a href="#bolum-13" class="fihrist-link"><span class="num">13</span> REST & WebSocket API</a>
+          <a href="#bolum-14" class="fihrist-link"><span class="num">14</span> Telefonsuz Test (Mock)</a>
+          <a href="#bolum-15" class="fihrist-link"><span class="num">15</span> Yol Haritası</a>
+          <a href="#bolum-16" class="fihrist-link"><span class="num">16</span> Sıkça Sorulan Sorular</a>
+          <a href="#bolum-17" class="fihrist-link"><span class="num">17</span> Etik, Hukuk ve Lisans</a>
+        </nav>
+
+        <div style="margin-top:28px; border:1px dashed var(--kenar); border-radius:6px; padding:12px;" class="font-mono">
+          <div style="font-size:10px; text-transform:uppercase; letter-spacing:0.14em; opacity:0.65;">Sistem Durumu</div>
+          <div style="margin-top:6px; font-size:11.5px; line-height:1.45; color:rgba(23,20,18,0.75);">
+            Teknoloji: Saf Node.js + Termux Native<br>
+            Bağımlılık: Yalnızca <code style="background:var(--bg-kart); padding:1px 4px;">ws</code><br>
+            Testler: 90 / 90 (%100 Başarı)
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- SAĞ İÇERİK AKIŞI -->
+    <main style="min-width:0; flex:1;">
+
+      <!-- ─── 01: NE İŞE YARAR? ─── -->
+      <section id="bolum-01" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">01</span>
+          <h2 class="bolum-baslik">Bu proje ne işe yarar?</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <p style="margin-top:20px; font-size:17px; line-height:1.6; color:rgba(23,20,18,0.85); max-width:68ch;">
+          <strong>Cebimon</strong>, eski bir Android telefonu (Redmi Note 8 gibi) root atmaya gerek kalmadan, 
+          Termux üzerinde çalışan ikinci bir yapay zekâ beynine dönüştürür.
+          Cihaz evinizde şarja ve Wi-Fi'a takılı kalır; hem cebinizdeki günlük telefondan hem de bilgisayarınızdan 
+          <strong>Sıfır Terminal Mobil Kokpiti</strong> üzerinden kontrol edilir.
+        </p>
+
+        <div class="kart-grid-3" style="margin-top:24px;">
+          <div class="kart-kutucuk">
+            <div class="etiket-vurgu">Gerçek VoIP Arama</div>
+            <p style="margin-top:8px; font-size:14px; line-height:1.45; color:rgba(23,20,18,0.8);">
+              GSM hattı yerine Baresip SIP köprüsü ile Zadarma santraline bağlanır. İstediğiniz numarayı klon sesinizle arar, konuşmayı canlı dinler ve transkript çıkarır.
+            </p>
+          </div>
+          <div class="kart-kutucuk">
+            <div class="etiket-vurgu">Klon Ses Stüdyosu</div>
+            <p style="margin-top:8px; font-size:14px; line-height:1.45; color:rgba(23,20,18,0.8);">
+              Fish Audio entegrasyonu ile Haluk Bilginer, Sedat Peker veya kendi klon sesinizle konuşur. Tarayıcıdan tek tıkla ses ön dinleme yapılabilir.
+            </p>
+          </div>
+          <div class="kart-kutucuk">
+            <div class="etiket-vurgu">Sıfır Terminal Kontrolü</div>
+            <p style="margin-top:8px; font-size:14px; line-height:1.45; color:rgba(23,20,18,0.8);">
+              Telefonda küçük klavyeyle kod yazmaya son. API anahtarları, klon ses seçimi, hızlı arama ve durum izleme tamamen mobil web panelinden yönetilir.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 02: NELER YAPABİLİR? ─── -->
+      <section id="bolum-02" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">02</span>
+          <h2 class="bolum-baslik">Neler yapabilir?</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <div class="tablo-sarmal">
+          <table class="bulten-tablo">
+            <thead>
+              <tr style="background:var(--bg-kart);">
+                <th>Sen Söylersin / Tıklarsın</th>
+                <th>Asistanın Ne Yapar</th>
+                <th>Bileşen / Araç</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-mono">"Haluk Bilginer sesiyle Salim'i ara"</td>
+                <td>Hedef numarayı VoIP üzerinden arar, klon sesle konuşmayı yürütür, özeti çıkarır.</td>
+                <td><span class="rozet">hizli_ara</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono">"Sesini Sedat Peker yap"</td>
+                <td>Asistan sesini anında Fish Audio klon sesine çevirir.</td>
+                <td><span class="rozet">ses_sec</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono">Panelden Hızlı Arama Butonu</td>
+                <td>Numara ve ses seçilip tek dokunuşla santralden canlı çağrı başlatılır.</td>
+                <td><span class="rozet">POST /api/hizli-ara</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono">"Etrafa bak, masada ne var?"</td>
+                <td>Telefon kamerasından fotoğraf çeker, görsel modelle sahneyi analiz eder.</td>
+                <td><span class="rozet">kamera</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono">"Hatırla: Yarın kargoyu şubeden al"</td>
+                <td>Kalıcı bellek dosyasına (<code class="font-mono">hafiza.md</code>) kaydeder ve sonra hatırlar.</td>
+                <td><span class="rozet">hafiza</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono">"Görev ekle: Akşam 8'de hatırlat"</td>
+                <td>Zamanlanmış görev listesine yazar, cron vakti geldiğinde bildirir.</td>
+                <td><span class="rozet">gorev</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono">Panelden Ayar Değiştirme</td>
+                <td>LLM veya SIP anahtarını forma yapıştırınca <code class="font-mono">.env</code> ve Baresip anında güncellenir.</td>
+                <td><span class="rozet">POST /api/ayarlar</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 03: NELER YAPAMAZ? ─── -->
+      <section id="bolum-03" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">03</span>
+          <h2 class="bolum-baslik">Neler yapamaz? (Güvenlik Sınırları)</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <div style="display:grid; grid-template-columns:1fr; gap:12px; margin-top:20px;">
+          <div class="kart-kutucuk beyaz" style="display:flex; gap:14px;">
+            <span class="font-mono" style="color:var(--kizil); font-weight:700;">✕</span>
+            <div>
+              <strong>Kabuk / Terminal Komutu Çalıştırmaz:</strong>
+              <p style="font-size:13.5px; color:rgba(23,20,18,0.75); margin-top:3px;">
+                LLM modeline kabuk (<code class="font-mono">shell</code>) aracı kesinlikle verilmez. Ajan sistem düzeyinde yetkisiz bash komutu yürütemez.
+              </p>
+            </div>
+          </div>
+
+          <div class="kart-kutucuk beyaz" style="display:flex; gap:14px;">
+            <span class="font-mono" style="color:var(--kizil); font-weight:700;">✕</span>
+            <div>
+              <strong>İzinsiz veya Sahte Arama Yapmaz:</strong>
+              <p style="font-size:13.5px; color:rgba(23,20,18,0.75); margin-top:3px;">
+                VoIP köprüsü yalnızca yapılandırılan Zadarma SIP hesabı üzerinden arar. Ses gidiş hattı testi yeşil değilse arama kapısı kilitlenir (HTTP 423).
+              </p>
+            </div>
+          </div>
+
+          <div class="kart-kutucuk beyaz" style="display:flex; gap:14px;">
+            <span class="font-mono" style="color:var(--kizil); font-weight:700;">✕</span>
+            <div>
+              <strong>Verileri Üçüncü Taraf Buluta Yedeklemez:</strong>
+              <p style="font-size:13.5px; color:rgba(23,20,18,0.75); margin-top:3px;">
+                Hafıza tamamen telefonun yerel depolamasında (<code class="font-mono">~/.asistan/</code>) saklanır. Dışarıya yalnızca kullanıcı onaylı API istekleri gider.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 04: NASIL ÇALIŞIR? ─── -->
+      <section id="bolum-04" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">04</span>
+          <h2 class="bolum-baslik">Nasıl çalışır? Mimari</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <pre class="kod-blok">CEBİNDEKİ TELEFON / BİLGİSAYAR      ESKİ TELEFON (Redmi Note 8, Termux)
+┌──────────────────────────────┐    ┌──────────────────────────────────────────────┐
+│  Mobil Kokpit (PWA)          │───▶│ BEYİN (Port 20131, HTTPS)                    │
+│  https://[telefon-ip]:20131/ │    │  ├─ LLM Araç Yönlendirici (hizli_ara, ses...) │
+└──────────────────────────────┘    │  ├─ Fish Audio / ElevenLabs TTS Motoru       │
+                                    │  └─ Kalıcı Hafıza (hafiza.md, SQLite)        │
+                                    │                                              │
+9ROUTER (Port 20128) ──────────────▶│ BEDEN (Port 20130, yalnızca localhost)      │
+WebRTC / P2P Güvenli Tüneli         │  ├─ Termux:API (Kamera, Mikrofon, TTS, Pil)  │
+                                    │  ├─ Baresip SIP Köprüsü (TCP 4444 / 5060)    │
+                                    │  └─ PCM Named Pipe (/tmp/spk.raw, mic.raw)   │
+                                    └──────────────────────────────────────────────┘</pre>
+
+        <div class="tablo-sarmal">
+          <table class="bulten-tablo">
+            <thead>
+              <tr style="background:var(--murekkep); color:var(--bg-kagit);">
+                <th>Bileşen</th>
+                <th>Görevi</th>
+                <th>Teknoloji</th>
+                <th>Port / Protokol</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-mono"><strong>BEYİN</strong></td>
+                <td>LLM orkestrasyonu, REST API, mobil kokpit web sunucusu</td>
+                <td>Node.js yerleşik HTTP/HTTPS + WebSocket</td>
+                <td class="font-mono">20131 (HTTPS)</td>
+              </tr>
+              <tr>
+                <td class="font-mono"><strong>BEDEN</strong></td>
+                <td>Termux donanım köprüsü, kamera, mikrofon, ses besleme</td>
+                <td>Termux:API + Node.js (Yalnızca localhost)</td>
+                <td class="font-mono">20130 (HTTP)</td>
+              </tr>
+              <tr>
+                <td class="font-mono"><strong>9ROUTER</strong></td>
+                <td>P2P NAT delme, WebRTC tünel ve token yönlendirme</td>
+                <td>9router core proxy</td>
+                <td class="font-mono">20128 (TCP)</td>
+              </tr>
+              <tr>
+                <td class="font-mono"><strong>VOIP (SIP)</strong></td>
+                <td>Zadarma santraline bağlanıp dış arama yapma ve alma</td>
+                <td>Baresip netstring ctrl_tcp + ALSA/FIFO</td>
+                <td class="font-mono">4444 (TCP) / 5060</td>
+              </tr>
+              <tr>
+                <td class="font-mono"><strong>SES STÜDYOSU</strong></td>
+                <td>Klon ses sentezi (Haluk Bilginer, Sedat Peker)</td>
+                <td>Fish Audio REST API + yerel önbellek</td>
+                <td class="font-mono">Dış API</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 05: GEREKSİNİMLER ─── -->
+      <section id="bolum-05" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">05</span>
+          <h2 class="bolum-baslik">Donanım ve Gereksinimler</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <div class="tablo-sarmal">
+          <table class="bulten-tablo">
+            <thead>
+              <tr style="background:var(--bg-kart);">
+                <th>Bileşen</th>
+                <th>Önerilen Sürüm</th>
+                <th>Kritik Not</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-mono">Telefon</td>
+                <td>Redmi Note 8 (4GB RAM)</td>
+                <td>Android 7+ arm64 mimarisi yeterlidir; root gerekmez.</td>
+              </tr>
+              <tr>
+                <td class="font-mono">Termux</td>
+                <td>0.118+</td>
+                <td><strong>Mutlaka F-Droid sürümü</strong> olmalıdır. Play Store sürümü terk edilmiştir.</td>
+              </tr>
+              <tr>
+                <td class="font-mono">Termux:API</td>
+                <td>0.50+</td>
+                <td>Kamera, mikrofon, pil ve SMS donanım erişimi için şarttır.</td>
+              </tr>
+              <tr>
+                <td class="font-mono">Termux:Boot</td>
+                <td>0.8+</td>
+                <td>Telefon yeniden başladığında servislerin otomatik ayağa kalkmasını sağlar.</td>
+              </tr>
+              <tr>
+                <td class="font-mono">Node.js</td>
+                <td>20 LTS veya 22</td>
+                <td>Termux paket yöneticisinden kurulur (<code class="font-mono">pkg install nodejs-lts</code>).</td>
+              </tr>
+              <tr>
+                <td class="font-mono">Baresip & FFmpeg</td>
+                <td>Son sürüm</td>
+                <td>VoIP SIP ses kodlama ve netstring arayüzü için gereklidir.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 06: KURULUM ─── -->
+      <section id="bolum-06" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">06</span>
+          <h2 class="bolum-baslik">Kurulum Adım Adım</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <div style="font-size:15.5px; line-height:1.65; margin-top:20px;">
+          <ol style="padding-left:24px; display:grid; gap:12px;">
+            <li><strong>F-Droid'den Termux, Termux:API ve Termux:Boot kurun.</strong></li>
+            <li><strong>Depolama izni verip paketleri güncelleyin:</strong>
+              <pre class="kod-blok">termux-setup-storage
+pkg update -y && pkg install -y nodejs-lts git baresip ffmpeg</pre>
+            </li>
+            <li><strong>Depoyu klonlayıp kurulum betiğini çalıştırın:</strong>
+              <pre class="kod-blok">git clone https://github.com/AppleCurse/asistanim-cebimde-cebimon.git ~/asistanim-cebimde
+cd ~/asistanim-cebimde
+bash scripts/termux/kur.sh</pre>
+            </li>
+            <li><strong>Servisleri başlatın:</strong>
+              <pre class="kod-blok">bash scripts/termux/baslat.sh</pre>
+            </li>
+            <li><strong>Giriş anahtarını (Token) öğrenin:</strong>
+              <pre class="kod-blok">cat ~/.asistan/beyin.token</pre>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 07: MOBİL KOKPİT ─── -->
+      <section id="bolum-07" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">07</span>
+          <h2 class="bolum-baslik">Sıfır Terminal Mobil Kokpit</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <p style="margin-top:20px; font-size:16px; line-height:1.6; color:rgba(23,20,18,0.85);">
+          Telefonda veya bilgisayarda tarayıcınızı açıp <code class="font-mono">https://[telefon-ip]:20131/</code> adresine girdiğinizde 
+          <strong>4 ana sekmeden oluşan dokunmatik kokpit</strong> karşılar:
+        </p>
+
+        <div class="kart-grid-2" style="margin-top:20px;">
+          <div class="kart-kutucuk">
+            <div class="etiket-vurgu">💬 1. Kokpit (Asistan & Arama)</div>
+            <p style="margin-top:6px; font-size:14px; line-height:1.45; color:rgba(23,20,18,0.8);">
+              Mikrofon butonuna basarak Türkçe sesli sohbet edebilir, <strong>Hızlı Arama Kartı</strong> üzerinden istediğiniz numarayı seçip klon sesle tek tıkla arayabilirsiniz.
+            </p>
+          </div>
+          <div class="kart-kutucuk">
+            <div class="etiket-vurgu">🎭 2. Sesler (Ses Stüdyosu)</div>
+            <p style="margin-top:6px; font-size:14px; line-height:1.45; color:rgba(23,20,18,0.8);">
+              Haluk Bilginer, Sedat Peker, Doğal Emel seslerini tarayıcıdan <code class="font-mono">🔊 Dinle</code> butonu ile test edebilir, tek dokunuşla varsayılan yapabilir veya yeni özel klon ID ekleyebilirsiniz.
+            </p>
+          </div>
+          <div class="kart-kutucuk">
+            <div class="etiket-vurgu">⚙️ 3. Ayarlar & API Merkezi</div>
+            <p style="margin-top:6px; font-size:14px; line-height:1.45; color:rgba(23,20,18,0.8);">
+              LLM API anahtarlarını, Fish Audio anahtarını ve Zadarma SIP kullanıcı adı/şifresini formdan yapıştırıp kaydedin. <code class="font-mono">.env</code> ve Baresip otomatik güncellenir.
+            </p>
+          </div>
+          <div class="kart-kutucuk">
+            <div class="etiket-vurgu">📊 4. Durum & Geçmiş</div>
+            <p style="margin-top:6px; font-size:14px; line-height:1.45; color:rgba(23,20,18,0.8);">
+              Beden donanım durumu, santral bağlantısı, pil seviyesi, bellek notları ve geçmiş VoIP arama transkriptlerini anlık izleyin.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 08: AYARLAR ─── -->
+      <section id="bolum-08" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">08</span>
+          <h2 class="bolum-baslik">Ayarlar & .env Yapısı</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <p style="margin-top:20px; font-size:15px; line-height:1.6; color:rgba(23,20,18,0.85);">
+          Ayarları mobil kokpitten yapabileceğiniz gibi, terminalden doğrudan <code class="font-mono">~/asistanim-cebimde/.env</code> dosyasını da düzenleyebilirsiniz:
+        </p>
+
+        <pre class="kod-blok"># LLM & 9router Yapılandırması
+LLM_BASE_URL=http://127.0.0.1:20128/v1
+LLM_API_KEY=9r-yerel-anahtar
+LLM_MODEL=openai/gpt-4o-mini
+
+# Fish Audio Klon Ses Ayarları
+FISH_AUDIO_API_KEY=your_fish_audio_api_key_here
+FISH_AUDIO_VOICE_ID=66f55da63a4a47b982ae64723dd79194
+TTS_SAGLAYICI=fish_audio
+
+# Zadarma VoIP / SIP Ayarları
+SIP_SERVER=pbx.zadarma.com
+SIP_USER=123456
+SIP_PASS=your_sip_password_here
+SIP_PORT=5060</pre>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 09: GÜNLÜK YÖNETİM ─── -->
+      <section id="bolum-09" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">09</span>
+          <h2 class="bolum-baslik">Günlük Yönetim Komutları</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <pre class="kod-blok"># Servislerin durumunu ve IP adreslerini gör
+bash ~/asistanim-cebimde/scripts/termux/durum.sh
+
+# Ses gidiş hattı teşhisi (arama kapısı kontrolü)
+bash ~/asistanim-cebimde/scripts/termux/ses-testi.sh
+
+# Tüm servisleri durdur
+bash ~/asistanim-cebimde/scripts/termux/durdur.sh
+
+# Tüm servisleri yeniden başlat
+bash ~/asistanim-cebimde/scripts/termux/baslat.sh
+
+# Canlı log akışını takip et
+tail -f ~/.asistan/log/beyin.log</pre>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 10: SORUN GİDERME ─── -->
+      <section id="bolum-10" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">10</span>
+          <h2 class="bolum-baslik">Sorun Giderme Rehberi</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <div class="tablo-sarmal">
+          <table class="bulten-tablo">
+            <thead>
+              <tr style="background:var(--bg-kart);">
+                <th>Belirti / Hata</th>
+                <th>Sebebi</th>
+                <th>Çözüm Adımı</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-mono"><strong>HTTP 423 / Ses Testi Uyarısı</strong></td>
+                <td>Güvenlik kapısı: Ses gidiş hattı henüz test edilmediği için arama kilitli.</td>
+                <td>Termux'ta <code class="font-mono">bash scripts/termux/ses-testi.sh</code> çalıştırın.</td>
+              </tr>
+              <tr>
+                <td class="font-mono"><strong>Tarayıcı "Güvenli Değil" Uyarısı</strong></td>
+                <td>HTTPS kendinden imzalı yerel TLS sertifikası kullanılıyor.</td>
+                <td>Gelişmiş → <em>127.0.0.1 sitesine ilerle (güvenli değil)</em> seçeneğine bir kez dokunun.</td>
+              </tr>
+              <tr>
+                <td class="font-mono"><strong>Giriş Ekranında Token Hatası</strong></td>
+                <td>Token querystring/localStorage üzerinden okunmaz, elle yapıştırılmalıdır.</td>
+                <td><code class="font-mono">cat ~/.asistan/beyin.token</code> komutundaki 48 karakterlik değeri girin.</td>
+              </tr>
+              <tr>
+                <td class="font-mono"><strong>Baresip Kayıt Başarısız</strong></td>
+                <td>SIP kullanıcı adı veya şifresi eksik/hatalı.</td>
+                <td>Mobil kokpitte Ayarlar sekmesine girip Zadarma bilgilerinizi kaydedin.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 11: GÜVENLİK MODELİ ─── -->
+      <section id="bolum-11" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">11</span>
+          <h2 class="bolum-baslik">Güvenlik & İzin Kapıları</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <div style="font-size:15px; line-height:1.65; margin-top:20px; display:grid; gap:16px;">
+          <p>
+            <strong>1. Donanım İzolasyonu (Localhost Yalnızca):</strong> Beden servisi (<code class="font-mono">beden/server.mjs</code>) yalnızca <code class="font-mono">127.0.0.1:20130</code> dinler. Dış ağdan, Wi-Fi'dan veya tünellerden doğrudan beden portuna erişim imkansızdır.
+          </p>
+          <p>
+            <strong>2. Kriptografik Token Doğrulaması:</strong> Beyin üzerindeki <code class="font-mono">/saglik</code> hariç tüm API uçları yetkilendirme başlığı (<code class="font-mono">Authorization: Bearer [token]</code>) veya oturum çerezi gerektirir. Token güvenli olmayan querystring parametrelerinden okunmaz.
+          </p>
+          <p>
+            <strong>3. Sıkı Ajan İzin Kapısı:</strong> Ajanın LLM fonksiyon çağrılarına (<code class="font-mono">tools</code>) tehlikeli komutlar (arama, SMS) için açık kullanıcı izni şartı konmuştur; kabuk aracı tamamen devre dışıdır.
+          </p>
+        </div>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 12: DEPO YAPISI ─── -->
+      <section id="bolum-12" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">12</span>
+          <h2 class="bolum-baslik">Depo Dizin Yapısı</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <pre class="kod-blok">asistanim-cebimde/
+├─ beyin/
+│  ├─ index.mjs            # HTTPS API + Mobil Web Sunucusu (Port 20131)
+│  ├─ asistan.mjs          # Asistan orkestrasyonu & hafıza yönetimi
+│  ├─ araclar.mjs          # LLM araçları (hizli_ara, ses_sec, gorev, hafiza...)
+│  ├─ llm.mjs              # 9router / LLM / Fish Audio TTS istemcisi
+│  ├─ kopru/
+│  │  ├─ motor.mjs         # Taşıyıcıdan bağımsız görüşme motoru
+│  │  └─ sip.mjs           # Baresip SIP/VoIP köprüsü
+│  └─ web/                 # Sıfır terminal mobil kokpiti (HTML5/CSS3/JS PWA)
+├─ beden/
+│  └─ server.mjs           # Termux native donanım köprüsü (Port 20130)
+├─ ortak/
+│  └─ ayar.mjs             # Ayarlar & .env kalıcı yönetimi
+├─ scripts/
+│  ├─ termux/              # baslat.sh, durum.sh, durdur.sh, kur.sh, ses-testi.sh
+│  └─ dev/                 # sahte-ortam.mjs
+├─ test/                   # 90 birim test paketi (node:test)
+└─ docs/
+   ├─ bulten.html          # Bu bülten (Teknik Gazete)
+   ├─ kurulum.md           # Adım adım kurulum kılavuzu
+   └─ mimari.md            # Derin mimari spesifikasyonu</pre>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 13: API ─── -->
+      <section id="bolum-13" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">13</span>
+          <h2 class="bolum-baslik">REST & WebSocket API</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <div class="tablo-sarmal">
+          <table class="bulten-tablo">
+            <thead>
+              <tr style="background:var(--murekkep); color:var(--bg-kagit);">
+                <th>Metot / Uç Nokta</th>
+                <th>Kimlik Doğrulama</th>
+                <th>İşlev ve Dönüş Formatı</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-mono">GET /saglik</td>
+                <td>Gerekmez</td>
+                <td>Sistem ve calismaSuresi durumunu JSON döner.</td>
+              </tr>
+              <tr>
+                <td class="font-mono">POST /api/sohbet</td>
+                <td>Token Zorunlu</td>
+                <td>Metin veya sesli girdi alıp LLM asistan yanıtı döner.</td>
+              </tr>
+              <tr>
+                <td class="font-mono">POST /api/hizli-ara</td>
+                <td>Token Zorunlu</td>
+                <td>Hedef numarayı seçilen klon ses ile VoIP santralinden arar.</td>
+              </tr>
+              <tr>
+                <td class="font-mono">GET /api/sesler</td>
+                <td>Token Zorunlu</td>
+                <td>Haluk Bilginer, Sedat Peker ve aktif sesi listeler.</td>
+              </tr>
+              <tr>
+                <td class="font-mono">POST /api/ses/on-dinle</td>
+                <td>Token Zorunlu</td>
+                <td>Seçilen sesin önizleme ses dalgasını base64 döner.</td>
+              </tr>
+              <tr>
+                <td class="font-mono">POST /api/ayarlar</td>
+                <td>Token Zorunlu</td>
+                <td>LLM, Fish Audio ve SIP ayarlarını .env'e kalıcı kaydeder.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 14: TELEFONSUZ GELİŞTİRME ─── -->
+      <section id="bolum-14" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">14</span>
+          <h2 class="bolum-baslik">Telefonsuz Geliştirme (Sahte Ortam)</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <p style="margin-top:20px; font-size:15px; line-height:1.6; color:rgba(23,20,18,0.85);">
+          Gerçek Android telefona ihtiyaç duymadan, bilgisayarınızda sahte beden ve sahte 9router ile tüm sistemi ve mobil kokpiti test edebilirsiniz:
+        </p>
+
+        <pre class="kod-blok"># Sahte ortamı başlat (Port 20131'de panel açılır)
+node scripts/dev/sahte-ortam.mjs
+
+# Birim testleri çalıştır (90 test)
+npm test</pre>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 15: YOL HARİTASI ─── -->
+      <section id="bolum-15" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">15</span>
+          <h2 class="bolum-baslik">Yol Haritası</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <div style="display:grid; grid-template-columns:1fr; gap:12px; margin-top:20px;">
+          <div class="kart-kutucuk beyaz" style="display:flex; gap:16px; align-items:center;">
+            <span class="rozet koyu">Tamamlandı</span>
+            <div>
+              <strong>v0.1.0 — Baresip VoIP & Fish Audio & Mobil Kokpit</strong>
+              <div style="font-size:13.5px; color:rgba(23,20,18,0.75);">Sıfır terminal mobil panel, Haluk Bilginer & Sedat Peker klon sesleri, 72+ saat saha testi.</div>
+            </div>
+          </div>
+          <div class="kart-kutucuk beyaz" style="display:flex; gap:16px; align-items:center;">
+            <span class="rozet">Sırada</span>
+            <div>
+              <strong>v0.2.0 — WhatsApp & SMS Entegrasyonu</strong>
+              <div style="font-size:13.5px; color:rgba(23,20,18,0.75);">Gelen SMS ve mesajları sese dökme, otomatik yanıt taslakları.</div>
+            </div>
+          </div>
+          <div class="kart-kutucuk beyaz" style="display:flex; gap:16px; align-items:center;">
+            <span class="rozet">Gelecek</span>
+            <div>
+              <strong>v0.3.0 — Tamamen Çevrimdışı Küçük Dil Modeli</strong>
+              <div style="font-size:13.5px; color:rgba(23,20,18,0.75);">Termux içinde yerel Qwen / Llama 1B-3B model desteği ile internetsiz akıl yürütme.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 16: SSS ─── -->
+      <section id="bolum-16" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">16</span>
+          <h2 class="bolum-baslik">Sıkça Sorulan Sorular</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <div style="margin-top:24px;">
+          <div class="sss-oge">
+            <div class="sss-soru">Telefonuma root atmam gerekiyor mu?</div>
+            <div class="sss-cevap">Hayır. Tüm sistem standart F-Droid Termux ve Termux:API izinleriyle root olmadan çalışır.</div>
+          </div>
+          <div class="sss-oge">
+            <div class="sss-soru">Neden Linphone yerine Baresip kullanıldı?</div>
+            <div class="sss-cevap">Baresip, Termux bionic derlemesinde çok daha hafif çalışır, netstring kontrol protokolü ile saniyede yüzlerce bayt ses paketini sıfır takılmayla işler.</div>
+          </div>
+          <div class="sss-oge">
+            <div class="sss-soru">Bilgisayarımdan veya başka telefondan girebilir miyim?</div>
+            <div class="sss-cevap">Evet! Aynı Wi-Fi'da olduğunuz sürece bilgisayarınızın veya şahsi telefonunuzun tarayıcısından <code class="font-mono">https://[telefon-ip]:20131/</code> adresini açarak bağlanabilirsiniz.</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="bolum-ayirici"></div>
+
+      <!-- ─── 17: ETİK VE HUKUK ─── -->
+      <section id="bolum-17" class="bolum-blok">
+        <div class="bolum-baslik-satir">
+          <span class="bolum-numara">17</span>
+          <h2 class="bolum-baslik">Etik, Hukuk ve Lisans</h2>
+        </div>
+        <div class="bolum-cizgi"></div>
+
+        <div style="font-size:15px; line-height:1.65; margin-top:20px; display:grid; gap:14px; color:rgba(23,20,18,0.85);">
+          <p>
+            Bu yazılım kişisel bir asistandır; casus yazılım veya izinsiz ses kayıt aracı değildir. 
+            VoIP görüşmelerinde karşı tarafın rızası ve yerel mevzuata uyum tamamen kullanıcının sorumluluğundadır.
+          </p>
+          <p>
+            Klon ses teknolojisi (Fish Audio) kullanılırken ses sahibinin açık rızası gözetilmelidir. 
+            Yanıltıcı, zararlı veya sahtecilik amaçlı kullanımlar MIT lisansının ruhuna aykırıdır.
+          </p>
+          <div class="kart-kutucuk kirmizi" style="margin-top:12px;">
+            <div class="etiket-vurgu">MIT Lisansı — Açık Kaynak</div>
+            <div style="font-size:13px; margin-top:6px;">
+              Copyright (c) 2026 Asistanım Cebimde (Cebimon) Katkıcıları. Yazılım "olduğu gibi" sağlanır; hiçbir garanti verilmez.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── ALT BİLGİ BARI ─── -->
+      <footer style="margin-top:80px; border-top:2px solid var(--murekkep); padding-top:24px; padding-bottom:40px;">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px;" class="font-mono">
+          <div style="display:flex; gap:8px;">
+            <span class="rozet koyu">Açık Kaynak · MIT</span>
+            <span class="rozet">Root'suz Termux</span>
+            <span class="rozet">Redmi Note 8</span>
+          </div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:rgba(23,20,18,0.65);">
+            Cebimon · Teknik Bülten · 2026
+          </div>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- ─── AKTİF FİHRİST SCROLLSPY ─── -->
+  <script>
+    (function () {
+      const navLinks = document.querySelectorAll('#fihristNav a');
+      const sections = document.querySelectorAll('section.bolum-blok');
+
+      function onScroll() {
+        let currentId = '';
+        const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+
+        sections.forEach((sec) => {
+          const top = sec.offsetTop - 120;
+          if (scrollY >= top) {
+            currentId = sec.getAttribute('id');
+          }
+        });
+
+        navLinks.forEach((link) => {
+          link.classList.remove('aktif');
+          if (link.getAttribute('href') === '#' + currentId) {
+            link.classList.add('aktif');
+          }
+        });
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
+</body>
+</html>
