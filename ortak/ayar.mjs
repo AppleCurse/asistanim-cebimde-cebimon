@@ -76,6 +76,13 @@ export const VARSAYILAN_AYAR = {
       model: '',
     },
   },
+  sip: {
+    sunucu: 'pbx.zadarma.com',
+    kullanici: '',
+    sifre: '',
+    port: 5060,
+  },
+  ozelSesler: [],
 };
 
 function nesneMi(v) {
@@ -134,6 +141,12 @@ function ortamUygula(ayar) {
   if (e.ARAMA_LLM_BASE_URL) a.arama.llm.baseUrl = e.ARAMA_LLM_BASE_URL;
   if (e.ARAMA_LLM_API_KEY) a.arama.llm.apiKey = e.ARAMA_LLM_API_KEY;
   if (e.ARAMA_LLM_MODEL) a.arama.llm.model = e.ARAMA_LLM_MODEL;
+
+  if (!a.sip) a.sip = { sunucu: 'pbx.zadarma.com', kullanici: '', sifre: '', port: 5060 };
+  if (e.SIP_SERVER) a.sip.sunucu = e.SIP_SERVER;
+  if (e.SIP_USER) a.sip.kullanici = e.SIP_USER;
+  if (e.SIP_PASS) a.sip.sifre = e.SIP_PASS;
+  if (e.SIP_PORT) a.sip.port = Number(e.SIP_PORT);
   return a;
 }
 
@@ -156,6 +169,66 @@ export function ayarYukle() {
 export function ayarKaydet(ayar) {
   dizinleriHazirla();
   fs.writeFileSync(AYAR_DOSYASI, JSON.stringify(ayar, null, 2) + '\n', { mode: 0o600 });
+}
+
+/**
+ * Ortam değişkenlerini (.env) kalıcı olarak günceller veya ekler.
+ * Panelden API anahtarı veya ayar girildiğinde terminale gerek kalmadan kaydeder.
+ */
+export function envGuncelle(degiskenler = {}) {
+  const adayYollar = [
+    path.join(process.cwd(), '.env'),
+    path.join(ASISTAN_HOME, '.env'),
+    '/data/data/com.termux/files/home/asistanim-cebimde/.env',
+    path.join(os.homedir(), 'asistanim-cebimde', '.env'),
+  ];
+  let hedefYol = adayYollar.find((p) => {
+    try { return fs.existsSync(p); } catch { return false; }
+  });
+  if (!hedefYol) hedefYol = path.join(process.cwd(), '.env');
+
+  let icerik = '';
+  try {
+    if (fs.existsSync(hedefYol)) icerik = fs.readFileSync(hedefYol, 'utf8');
+  } catch {}
+
+  for (const [k, v] of Object.entries(degiskenler)) {
+    if (v === undefined || v === null) continue;
+    const degerStr = String(v);
+    process.env[k] = degerStr;
+    const reg = new RegExp(`^${k}=.*$`, 'm');
+    if (reg.test(icerik)) {
+      icerik = icerik.replace(reg, `${k}=${degerStr}`);
+    } else {
+      icerik += (icerik && !icerik.endsWith('\n') ? '\n' : '') + `${k}=${degerStr}\n`;
+    }
+  }
+
+  try {
+    fs.writeFileSync(hedefYol, icerik, { encoding: 'utf8', mode: 0o600 });
+  } catch {
+    /* dosya yazılamıyorsa sessiz geç */
+  }
+}
+
+/**
+ * Zadarma / SIP VoIP santral hesap satırını Baresip yapılandırma dosyasına yazar.
+ */
+export function baresipHesapGuncelle({ sunucu, kullanici, sifre }) {
+  if (!sunucu || !kullanici || !sifre) return;
+  const adayYollar = [
+    '/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/root/.baresip/accounts',
+    path.join(os.homedir(), '.baresip', 'accounts'),
+  ];
+  for (const p of adayYollar) {
+    try {
+      const dizin = path.dirname(p);
+      if (fs.existsSync(dizin)) {
+        const satir = `<sip:${kullanici}@${sunucu}>;auth_pass=${sifre}\n`;
+        fs.writeFileSync(p, satir, { encoding: 'utf8', mode: 0o600 });
+      }
+    } catch {}
+  }
 }
 
 /**

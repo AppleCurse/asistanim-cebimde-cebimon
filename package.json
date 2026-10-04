@@ -12,7 +12,7 @@
     "beyin": "node beyin/index.mjs",
     "sohbet": "node beyin/cli.mjs",
     "modeller": "node beyin/cli.mjs --modeller",
-    "test": "node --test test/*.test.mjs",
+    "test": "node --test test/beden.test.mjs test/beyin.test.mjs test/cebi.test.mjs test/gorev.test.mjs test/kuyruk.test.mjs test/llm.test.mjs test/motor.test.mjs test/scripts.test.mjs test/sip.test.mjs",
     "kanarya": "bash scripts/termux/kanarya-calistir.sh"
   },
   "dependencies": {

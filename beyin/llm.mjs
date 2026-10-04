@@ -292,8 +292,10 @@ export class LLMIstemci {
     return (veri.text || '').trim();
   }
 
-  /** Metin → ses (Buffer). */
-  async seslendir(metin, { model, ses, format = 'mp3' } = {}) {
+  /** Metin → ses (Buffer). İkinci argüman seçenek nesnesi ya da doğrudan ses kimliği (string) olabilir;
+   *  görüşme motoru `gorev.ses`'i düz metin olarak geçirir — eskiden bu sessizce yok sayılıyordu. */
+  async seslendir(metin, secenek = {}) {
+    const { model, ses, format = 'mp3' } = typeof secenek === 'string' ? { ses: secenek } : (secenek || {});
     if (!metin || !metin.trim()) return Buffer.alloc(0);
     const sesSecimi = ses || this.ttsVoice || 'tr-TR-EmelNeural';
     const onbellekAnahtari = `${metin.trim()}|${model || ''}|${sesSecimi}|${format}`;

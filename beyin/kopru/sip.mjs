@@ -252,11 +252,10 @@ export class SipKoprusu {
   formatlaNumara(num) {
     if (String(num || '').includes('@')) return String(num);
     let n = String(num || '').replace(/\D+/g, '');
-    if (n.startsWith('00')) return n;
-    if (n.startsWith('90') && n.length === 12) return '00' + n;
-    if (n.startsWith('0') && n.length === 11) return '0090' + n.slice(1);
-    if (n.length === 10) return '0090' + n;
-    return '00' + n;
+    if (n.startsWith('00')) n = n.slice(2);
+    if (n.startsWith('0') && n.length === 11) return '90' + n.slice(1);
+    if (n.length === 10) return '90' + n;
+    return n;
   }
 
   /** Baresip mikrofon girişine (mic.raw) kesintisiz, duvar saatine kilitli S16LE PCM basan besleyici.

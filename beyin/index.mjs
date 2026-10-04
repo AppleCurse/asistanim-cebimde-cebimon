@@ -8,7 +8,8 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { ayarYukle, tokenAl, logOlustur, ASISTAN_HOME } from '../ortak/ayar.mjs';
+import { ayarYukle, ayarKaydet, envGuncelle, baresipHesapGuncelle, tokenAl, logOlustur, ASISTAN_HOME } from '../ortak/ayar.mjs';
+import { HAZIR_SESLER, sesiCoz } from './araclar.mjs';
 import { LLMIstemci, guvenliUrlGorunumu } from './llm.mjs';
 import { BedenIstemci } from './beden-istemci.mjs';
 import { Hafiza } from './hafiza.mjs';
@@ -114,8 +115,8 @@ export function beyinBaslat({ ayar = ayarYukle(), token = tokenAl('beyin'), bede
   const beden = new BedenIstemci({ url: ayar.beyin.bedenUrl, token: bedenToken });
   const hafiza = new Hafiza();
   const gorevler = new GorevYoneticisi({ llm, ayar, hafiza, log });
-  const asistan = new Asistan({ llm, beden, ayar, hafiza, gorevler, cebimon, log });
   const sipKoprusu = new SipKoprusu({ llm: aramaLlm, gorevler, ayar, log });
+  const asistan = new Asistan({ llm, beden, ayar, hafiza, gorevler, cebimon, sipKoprusu, log });
 
   const yetkiliMi = (req) => {
     const bearer = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
@@ -220,6 +221,195 @@ export function beyinBaslat({ ayar = ayarYukle(), token = tokenAl('beyin'), bede
       const numara = govde.numara;
       if (!numara) throw Object.assign(new Error('numara gerekli'), { kod: 400 });
       return sipKoprusu.ara({ numara, gorev: govde.gorev });
+    }
+    if (M === 'POST' && yol === '/hizli-ara') {
+      const numara = String(govde.numara || '').trim();
+      if (!numara) throw Object.assign(new Error('numara gerekli'), { kod: 400 });
+      const secilenSes = sesiCoz(govde.ses || govde.sesId, ayar);
+      const sesId = secilenSes ? secilenSes.id : (govde.sesId || (ayar.beyin.tts === 'fish_audio' ? ayar.beyin.llm.fishAudioVoiceId : ayar.beyin.llm.ttsVoice));
+      const talimat = govde.talimat || `${numara} ile telefon görüşmesi`;
+      const g = await gorevler.olustur(talimat, { kaynak: 'hizli-ara', numara });
+      if (sesId) g.ses = sesId;
+      if (govde.acilis) g.acilis = govde.acilis;
+      const s = await sipKoprusu.ara({ gorev: g, numara });
+      gorevler.guncelle(g.id, { durum: 'araniyor', mod: 'voip', kisi: { ...g.kisi, numara }, ses: sesId });
+      return { tamam: true, gorevId: g.id, durum: 'araniyor', ses: sesId, ...s };
+    }
+
+    if (M === 'GET' && yol === '/sesler') {
+      const aktifId = ayar.beyin.tts === 'fish_audio'
+        ? (ayar.beyin.llm.fishAudioVoiceId || HAZIR_SESLER[0].id)
+        : (ayar.beyin.llm.ttsVoice || 'tr-TR-EmelNeural');
+      const aktifSes = HAZIR_SESLER.find((s) => s.id === aktifId)
+        || (ayar.ozelSesler || []).find((s) => s.id === aktifId)
+        || { id: aktifId, ad: aktifId, tur: ayar.beyin.tts, etiket: 'Aktif Ses' };
+      return {
+        aktif: { ...aktifSes, tur: ayar.beyin.tts },
+        sesler: HAZIR_SESLER,
+        ozelSesler: ayar.ozelSesler || [],
+      };
+    }
+    if (M === 'POST' && yol === '/ses/on-dinle') {
+      const sesGiris = govde.sesId || govde.ses;
+      if (!sesGiris) throw Object.assign(new Error('sesId gerekli'), { kod: 400 });
+      const cozulmus = sesiCoz(sesGiris, ayar);
+      const sesId = cozulmus ? cozulmus.id : sesGiris;
+      const tur = cozulmus?.tur || govde.tur || (sesId.length === 32 ? 'fish_audio' : 'edge-tts');
+      const metin = String(govde.metin || 'Merhaba! Ben senin yapay zeka asistanınım, nasıl yardımcı olabilirim?');
+      const sesBuf = await llm.seslendir(metin, { ses: sesId, motor: tur, format: 'mp3' });
+      if (!sesBuf || !sesBuf.length) throw Object.assign(new Error('Ses sentezlenemedi'), { kod: 500 });
+      return { tamam: true, sesBase64: sesBuf.toString('base64'), mime: 'audio/mp3' };
+    }
+    if (M === 'POST' && yol === '/ses/varsayilan-yap') {
+      const sesGiris = govde.sesId || govde.ses;
+      if (!sesGiris) throw Object.assign(new Error('sesId gerekli'), { kod: 400 });
+      const cozulmus = sesiCoz(sesGiris, ayar);
+      const sesId = cozulmus ? cozulmus.id : sesGiris;
+      const tur = cozulmus?.tur || govde.tur || (sesId.length === 32 ? 'fish_audio' : 'edge-tts');
+      const ad = cozulmus?.ad || govde.ad || sesId;
+      if (tur === 'fish_audio') {
+        ayar.beyin.tts = 'fish_audio';
+        ayar.beyin.llm.fishAudioVoiceId = sesId;
+        llm.ttsSaglayici = 'fish_audio';
+        llm.fishAudioVoiceId = sesId;
+        aramaLlm.ttsSaglayici = 'fish_audio';
+        aramaLlm.fishAudioVoiceId = sesId;
+        envGuncelle({ TTS_SAGLAYICI: 'fish_audio', FISH_AUDIO_VOICE_ID: sesId });
+      } else {
+        ayar.beyin.tts = tur || 'edge-tts';
+        ayar.beyin.llm.ttsVoice = sesId;
+        llm.ttsSaglayici = ayar.beyin.tts;
+        llm.ttsVoice = sesId;
+        aramaLlm.ttsSaglayici = ayar.beyin.tts;
+        aramaLlm.ttsVoice = sesId;
+        envGuncelle({ TTS_SAGLAYICI: ayar.beyin.tts, TTS_VOICE: sesId });
+      }
+      ayarKaydet(ayar);
+      return { tamam: true, aktif: { id: sesId, ad, tur: ayar.beyin.tts } };
+    }
+    if (M === 'POST' && yol === '/ses/ozel-ekle') {
+      const id = String(govde.id || '').trim();
+      const ad = String(govde.ad || '').trim();
+      const aciklama = String(govde.aciklama || '').trim();
+      if (!id || !ad) throw Object.assign(new Error('Voice ID ve İsim zorunludur'), { kod: 400 });
+      if (!ayar.ozelSesler) ayar.ozelSesler = [];
+      const yeniSes = { id, ad, tur: 'fish_audio', kategori: 'klon', etiket: 'Özel Klon', aciklama: aciklama || 'Özel tanımlı ses' };
+      const idx = ayar.ozelSesler.findIndex((s) => s.id === id);
+      if (idx >= 0) ayar.ozelSesler[idx] = yeniSes;
+      else ayar.ozelSesler.push(yeniSes);
+      ayarKaydet(ayar);
+      return { tamam: true, ses: yeniSes };
+    }
+
+    if (M === 'GET' && yol === '/ayarlar') {
+      return {
+        kullanici: {
+          ad: ayar.kullanici.ad || '',
+          asistanAdi: ayar.kullanici.asistanAdi || 'Aspasia',
+          dil: ayar.kullanici.dil || 'tr-TR',
+        },
+        llm: {
+          baseUrl: guvenliUrlGorunumu(llm.baseUrl),
+          apiKey: llm.apiKey || '',
+          model: llm.model || '',
+          groqApiKey: ayar.beyin.llm.groqApiKey || '',
+          openrouterApiKey: ayar.beyin.llm.openrouterApiKey || '',
+        },
+        ses: {
+          ttsSaglayici: ayar.beyin.tts || 'piper',
+          sttSaglayici: ayar.beyin.stt || 'android',
+          ttsVoice: ayar.beyin.llm.ttsVoice || 'tr-TR-EmelNeural',
+          fishAudioApiKey: ayar.beyin.llm.fishAudioApiKey || '',
+          fishAudioVoiceId: ayar.beyin.llm.fishAudioVoiceId || '66f55da63a4a47b982ae64723dd79194',
+        },
+        sip: {
+          sunucu: ayar.sip?.sunucu || 'pbx.zadarma.com',
+          kullanici: ayar.sip?.kullanici || '',
+          sifre: ayar.sip?.sifre ? '••••••••' : '',
+          port: ayar.sip?.port || 5060,
+        },
+        ozelSesler: ayar.ozelSesler || [],
+      };
+    }
+    if (M === 'POST' && yol === '/ayarlar') {
+      const envGuncellemeleri = {};
+
+      if (govde.kullanici?.ad !== undefined) {
+        ayar.kullanici.ad = String(govde.kullanici.ad).trim();
+        envGuncellemeleri.KULLANICI_ADI = ayar.kullanici.ad;
+      }
+      if (govde.kullanici?.asistanAdi !== undefined) {
+        ayar.kullanici.asistanAdi = String(govde.kullanici.asistanAdi).trim();
+        cebimon.ad = ayar.kullanici.asistanAdi;
+        envGuncellemeleri.ASISTAN_ADI = ayar.kullanici.asistanAdi;
+      }
+      if (govde.llm?.baseUrl !== undefined && govde.llm.baseUrl.trim()) {
+        ayar.beyin.llm.baseUrl = String(govde.llm.baseUrl).trim();
+        llm.baseUrl = ayar.beyin.llm.baseUrl;
+        aramaLlm.baseUrl = ayar.beyin.llm.baseUrl;
+        envGuncellemeleri.LLM_BASE_URL = ayar.beyin.llm.baseUrl;
+      }
+      if (govde.llm?.apiKey !== undefined) {
+        ayar.beyin.llm.apiKey = String(govde.llm.apiKey).trim();
+        llm.apiKey = ayar.beyin.llm.apiKey;
+        aramaLlm.apiKey = ayar.beyin.llm.apiKey;
+        envGuncellemeleri.LLM_API_KEY = ayar.beyin.llm.apiKey;
+      }
+      if (govde.llm?.model !== undefined) {
+        ayar.beyin.llm.model = String(govde.llm.model).trim();
+        llm.model = ayar.beyin.llm.model;
+        aramaLlm.model = ayar.beyin.llm.model;
+        envGuncellemeleri.LLM_MODEL = ayar.beyin.llm.model;
+      }
+      if (govde.llm?.groqApiKey !== undefined) {
+        ayar.beyin.llm.groqApiKey = String(govde.llm.groqApiKey).trim();
+        llm.groqApiKey = ayar.beyin.llm.groqApiKey;
+        envGuncellemeleri.GROQ_API_KEY = ayar.beyin.llm.groqApiKey;
+      }
+      if (govde.llm?.openrouterApiKey !== undefined) {
+        ayar.beyin.llm.openrouterApiKey = String(govde.llm.openrouterApiKey).trim();
+        llm.openrouterApiKey = ayar.beyin.llm.openrouterApiKey;
+        envGuncellemeleri.OPENROUTER_API_KEY = ayar.beyin.llm.openrouterApiKey;
+      }
+      if (govde.ses?.fishAudioApiKey !== undefined) {
+        ayar.beyin.llm.fishAudioApiKey = String(govde.ses.fishAudioApiKey).trim();
+        llm.fishAudioApiKey = ayar.beyin.llm.fishAudioApiKey;
+        aramaLlm.fishAudioApiKey = ayar.beyin.llm.fishAudioApiKey;
+        envGuncellemeleri.FISH_AUDIO_API_KEY = ayar.beyin.llm.fishAudioApiKey;
+      }
+      if (govde.ses?.fishAudioVoiceId !== undefined) {
+        ayar.beyin.llm.fishAudioVoiceId = String(govde.ses.fishAudioVoiceId).trim();
+        llm.fishAudioVoiceId = ayar.beyin.llm.fishAudioVoiceId;
+        aramaLlm.fishAudioVoiceId = ayar.beyin.llm.fishAudioVoiceId;
+        envGuncellemeleri.FISH_AUDIO_VOICE_ID = ayar.beyin.llm.fishAudioVoiceId;
+      }
+      if (govde.ses?.ttsSaglayici !== undefined) {
+        ayar.beyin.tts = String(govde.ses.ttsSaglayici).trim();
+        llm.ttsSaglayici = ayar.beyin.tts;
+        aramaLlm.ttsSaglayici = ayar.beyin.tts;
+        envGuncellemeleri.TTS_SAGLAYICI = ayar.beyin.tts;
+      }
+      if (govde.ses?.ttsVoice !== undefined) {
+        ayar.beyin.llm.ttsVoice = String(govde.ses.ttsVoice).trim();
+        llm.ttsVoice = ayar.beyin.llm.ttsVoice;
+        aramaLlm.ttsVoice = ayar.beyin.llm.ttsVoice;
+        envGuncellemeleri.TTS_VOICE = ayar.beyin.llm.ttsVoice;
+      }
+      if (govde.sip) {
+        if (!ayar.sip) ayar.sip = {};
+        if (govde.sip.sunucu) { ayar.sip.sunucu = String(govde.sip.sunucu).trim(); envGuncellemeleri.SIP_SERVER = ayar.sip.sunucu; }
+        if (govde.sip.kullanici) { ayar.sip.kullanici = String(govde.sip.kullanici).trim(); envGuncellemeleri.SIP_USER = ayar.sip.kullanici; }
+        if (govde.sip.sifre && govde.sip.sifre !== '••••••••') { ayar.sip.sifre = String(govde.sip.sifre).trim(); envGuncellemeleri.SIP_PASS = ayar.sip.sifre; }
+        if (govde.sip.port) { ayar.sip.port = Number(govde.sip.port); envGuncellemeleri.SIP_PORT = String(ayar.sip.port); }
+      }
+
+      ayarKaydet(ayar);
+      envGuncelle(envGuncellemeleri);
+      if (ayar.sip?.kullanici && ayar.sip?.sunucu && ayar.sip?.sifre) {
+        baresipHesapGuncelle(ayar.sip);
+      }
+
+      return { tamam: true, mesaj: 'Ayarlar başarıyla kaydedildi ve uygulandı.' };
     }
     const gorevEs = yol.match(/^\/gorevler\/([^/]+)(?:\/([^/]+))?$/);
     if (gorevEs) {

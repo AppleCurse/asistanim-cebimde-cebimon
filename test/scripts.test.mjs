@@ -19,7 +19,7 @@ test('9router: ilk parola kriptografik olarak üretilir, kalıcıdır ve dosya i
     assert.match(sifre, /^[a-f0-9]{64}$/);
     assert.equal(routerIlkSifreAl({ asistanHome: gecici, ilkSifre: 'baska-parola' }), sifre);
     assert.equal(fs.readFileSync(sifreDosyasi, 'utf8'), `${sifre}\n`);
-    assert.equal(fs.statSync(sifreDosyasi).mode & 0o777, 0o600);
+    if (process.platform !== 'win32') assert.equal(fs.statSync(sifreDosyasi).mode & 0o777, 0o600);
   } finally {
     fs.rmSync(gecici, { recursive: true, force: true });
   }
@@ -30,7 +30,7 @@ test('9router: kullanıcı parolası yalnız ilk başlatmada kaydedilir', () => 
   try {
     assert.equal(routerIlkSifreAl({ asistanHome: gecici, ilkSifre: 'kullanici-parolasi' }), 'kullanici-parolasi');
     assert.equal(routerIlkSifreAl({ asistanHome: gecici, ilkSifre: 'sonradan-degistirilen-env' }), 'kullanici-parolasi');
-    assert.equal(fs.statSync(path.join(gecici, '9router.initial-password')).mode & 0o777, 0o600);
+    if (process.platform !== 'win32') assert.equal(fs.statSync(path.join(gecici, '9router.initial-password')).mode & 0o777, 0o600);
   } finally {
     fs.rmSync(gecici, { recursive: true, force: true });
   }

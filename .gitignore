@@ -20,9 +20,23 @@ log/
 Thumbs.db
 tmp/
 
-# Kişisel arama scriptleri (gerçek numara/isim içerebilir — repoya girmesin)
+# Kişisel arama ve geçici tanı betikleri (gerçek numara/isim içerebilir — repoya girmesin)
 scripts/*-ara.mjs
 scripts/find-beyin-call*.mjs
 scripts/find-call.mjs
 scripts/check-zadarma.mjs
 scripts/read-log.mjs
+scripts/capture-anons.mjs
+scripts/debug-listen.sh
+scripts/test-echo.mjs
+scripts/bench.py
+scripts/baresip_ctrl.py
+scripts/otonom.py
+ajan.py
+docs/gorev.md
+.ajan/
+metrics.json
+.aider*
+__pycache__/
+.next/
+

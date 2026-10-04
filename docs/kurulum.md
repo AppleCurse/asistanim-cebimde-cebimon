@@ -76,7 +76,14 @@ Model listesi: `npm run modeller`
 bash ~/asistanim-cebimde/scripts/termux/baslat.sh
 ```
 
-Çıktıda `Yerel Panel: https://192.168.x.y:20131/` satırını cebindeki telefonda aç (aynı Wi-Fi). Giriş anahtarı için Termux'ta `cat ~/.asistan/beyin.token` çalıştır ve giriş ekranına gir; anahtarı URL'ye ekleme. Tarayıcı "güvenli değil" derse (kendinden imzalı sertifika) **Gelişmiş → Devam et** — bir kez. Manifest ve servis çalışanı PWA kodu depoda bulunur; **kurulum seçeneği platform/tarayıcı desteğine bağlıdır** ve hedef cihazlarda doğrulanmamıştır. Uyumlu tarayıcıda **⬇ Kur** veya menüde **Ana ekrana ekle** seçeneği görünebilir; iOS/Safari akışı da sürüme göre değişir.
+Çıktıda `Yerel Panel: https://192.168.x.y:20131/` satırını cebindeki telefonda aç (aynı Wi-Fi). Giriş anahtarı için Termux'ta `cat ~/.asistan/beyin.token` çalıştır ve giriş ekranına gir; anahtarı URL'ye ekleme. Tarayıcı "güvenli değil" derse (kendinden imzalı sertifika) **Gelişmiş → Devam et** — bir kez. Uyumlu tarayıcıda **⬇ Kur** veya menüde **Ana ekrana ekle** ile tam ekran mobil uygulama (PWA) olarak kullanabilirsin.
+
+### Sıfır Terminal Mobil Yönetim Kokpiti
+Panel açıldığında 4 temel sekme üzerinden tüm sistemi yönetebilirsin:
+1. **💬 Kokpit (Asistan & Hızlı Arama):** Bas-konuş mikrofonla Türkçe sesli komut ver; **Hızlı Arama** kartından numarayı ve kullanılacak sesi seçerek tek dokunuşla VoIP santralinden arama başlat.
+2. **🎭 Sesler (Ses Stüdyosu & Klonlar):** Fish Audio klon sesler (Haluk Bilginer `66f55da63a4a47b982ae64723dd79194`, Sedat Peker `4fef01e5df334bb0b1a039750058b760`) ve doğal sesleri tarayıcıda ön dinle (`🔊 Dinle`), tek tıkla varsayılan yap veya yeni özel ses ID'si ekle.
+3. **⚙️ Ayarlar & API Merkezi:** LLM API anahtarlarını, Fish Audio anahtarını ve Zadarma SIP santral kullanıcı adı/şifresini formdan yapıştırıp kaydet. Terminalde `.env` düzenleme zorunluluğu yoktur; ayarlar anında uygulanır.
+4. **📊 Durum & Geçmiş:** Beden, 9router, SIP, pil durumu, arama transkriptleri ve kalıcı hafızayı izle.
 
 Terminalden deneme: `npm run sohbet` → `pil kaç?`, `etrafa bak`, `"test" de`.
 

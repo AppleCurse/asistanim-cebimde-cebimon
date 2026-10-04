@@ -3,101 +3,388 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0f1216" />
+  <meta name="theme-color" content="#0b0e14" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="192x192" href="/statik/ikon-192.png" />
   <link rel="apple-touch-icon" href="/statik/ikon-180.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Asistanım Cebimde</title>
+  <title>Cebimon — Mobil Yönetim Kokpiti</title>
   <link rel="stylesheet" href="/statik/stil.css" />
 </head>
 <body>
-  <header>
-    <h1><img src="/statik/ikon-192.png" alt="" width="28" height="28" style="border-radius:7px" /> <span class="nabiz" id="nabiz"></span> <span id="asistanAdi">Asistan</span></h1>
-    <nav>
-      <a href="/telefon">📞 Telefon</a>
-      <a href="#" id="kur" style="display:none" title="Ana ekrana uygulama olarak kur">⬇ Kur</a>
-      <a href="#" id="yenile">↻</a>
+  <header class="ust-cubuk">
+    <div class="logo-alani">
+      <img src="/statik/ikon-192.png" alt="Cebimon" width="32" height="32" class="logo-img" />
+      <div class="logo-metin">
+        <h1><span class="nabiz" id="nabiz"></span> <span id="asistanAdi">Aspasia</span></h1>
+        <span class="alt-kullanici" id="kullaniciEtiket">Kişisel Asistan</span>
+      </div>
+    </div>
+    <nav class="ust-nav" aria-label="Masaüstü gezinti">
+      <button class="sekme-btn aktif" data-sekme="kokpit">💬 Kokpit</button>
+      <button class="sekme-btn" data-sekme="sesler">🎭 Sesler</button>
+      <button class="sekme-btn" data-sekme="ayarlar">⚙️ Ayarlar &amp; API</button>
+      <button class="sekme-btn" data-sekme="durum">📊 Durum</button>
+      <a href="/telefon" target="_blank" class="ust-link" title="Tarayıcı VoIP Telefonu">📞 WebPhone</a>
+      <a href="#" id="kur" class="ust-link" style="display:none" title="Uygulama olarak kur">⬇ Kur</a>
+      <a href="#" id="yenile" class="ust-link" title="Yenile">↻</a>
     </nav>
   </header>
 
   <div id="bildirim" class="toast" role="status" aria-live="polite" hidden></div>
 
-  <main>
-    <section class="cebi-hero" id="cebiHero">
-      <div class="cebi-ust"><div><span class="cebi-kucuk">DİJİTAL ASİSTANIN</span><h2><span id="cebiAd">Aspasia</span> <span class="sinif" id="cebiSinif">Kıvılcım</span></h2><p id="cebiMesaj">Henüz yeniyim. Bana ne yapacağını öğret.</p></div><div class="cebi-yuz" id="cebiYuz">✦</div></div>
-      <div class="cebi-durum"><span id="cebiMod">Hazır</span><span id="cebiCihaz">Cihaz kontrol ediliyor…</span></div>
-      <div class="cebi-eylemler"><button class="cebi-aksiyon" data-ortam="genel" data-amac="Kullanıcıya bulunduğu ortamda yardımcı ol">✦ Yanımda ol</button><button class="cebi-aksiyon" data-ortam="is" data-amac="İşimi adım adım takip et">💼 İş modu</button><button class="cebi-aksiyon" data-ortam="gezi" data-amac="Bulunduğum yeri ve gördüklerimi anlamama yardım et">🧭 Gezgin modu</button></div>
-    </section>
-
-    <section class="kart">
-      <div class="baslik-satiri"><div><h2>Görev tahtası</h2><p class="soluk alt-baslik" id="cebiBaslikAciklama">Bir cümleyle işi anlat; Aspasia adımları hazırlasın.</p></div><button class="buton tehlike" id="cebiTemizle" type="button">Geçmişi temizle</button></div>
-      <form id="cebiPlanForm">
-        <textarea id="cebiTalimat" placeholder="Örn: Arabanın yağını değiştireceğim, yardım et; kızımın saçını örmeme yardım et; şunu tamir edeceğim"></textarea>
-        <div class="satir"><button class="buton birincil" type="submit">Planı oluştur</button></div>
-      </form>
-      <div id="cebiTahta" style="margin-top:12px"></div>
-    </section>
-
-    <section class="kart">
-      <h2>Yaşam belirtileri</h2>
-      <div class="izgara" id="durum">
-        <div class="rozet"><b>Beden</b><span>…</span></div>
-      </div>
-      <p class="soluk" id="agBilgi"></p>
-    </section>
-
-    <section class="kart sohbet-karti">
-      <div class="baslik-satiri"><div><h2>Asistan</h2><p class="soluk alt-baslik">Ne yapmak istiyorsun?</p></div><span class="hazir-rozet">● Hazır</span></div>
-      <div class="hizli-eylemler" aria-label="Hızlı işlemler">
-        <button class="hizli" data-hizli="Pili, sıcaklığı ve bağlantıyı kontrol et">🔋<span>Durumu kontrol et</span></button>
-        <button class="hizli" data-hizli="Etrafına bak ve önemli gördüklerini söyle">👁<span>Etrafına bak</span></button>
-        <button class="hizli" data-hizli="Bugün yapmam gereken önemli işleri özetle">📋<span>Günümü özetle</span></button>
-        <button class="hizli" data-hizli="Son aramaları ve mesajları özetle">📞<span>Son görüşmeler</span></button>
-      </div>
-      <div class="sohbet" id="sohbet"></div>
-      <form class="satir" id="sohbetForm">
-        <button class="mikrofon" type="button" id="mikrofon" title="Konuşarak yaz">🎙</button>
-        <input id="mesaj" placeholder="Bir şey söyle veya yaz…" autocomplete="off" />
-        <button class="buton birincil" type="submit" id="gonder">Gönder</button>
-      </form>
-      <div class="satir" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-        <button class="buton" id="bak">📷 Kamera</button>
-        <button class="buton" id="soyle">🔊 Telefonda seslendir</button>
-        <button class="buton" id="sifirla">Sohbeti temizle</button>
-      </div>
-      <p class="soluk yardim" id="sesDurumu">Mikrofon düğmesine dokun, konuş; terminal gerekmez.</p>
-    </section>
-
-    <section class="kart">
-      <h2>Görüşme görevleri</h2>
-      <form id="gorevForm">
-        <textarea id="talimat" placeholder="Örn: Diş hekimi Dr. Aylin'i ara, Perşembe 15:00 randevumu bir sonraki haftaya aynı saate al. Olmazsa sabah saatleri de olur."></textarea>
-        <div class="satir" style="display:flex;gap:8px;margin-top:8px">
-          <input id="numara" placeholder="Numara (isteğe bağlı, +90…)" />
-          <button class="buton birincil" type="submit">Planla</button>
+  <main class="icerik-alani">
+    <!-- TAB 1: KOKPİT (Asistan & Hızlı Arama) -->
+    <div id="tab-kokpit" class="sekme-icerik aktif">
+      <section class="cebi-hero" id="cebiHero">
+        <div class="cebi-ust">
+          <div>
+            <span class="cebi-kucuk">MOBİL ASİSTAN KOKPİTİ</span>
+            <h2><span id="cebiAd">Aspasia</span> <span class="sinif" id="cebiSinif">Kıvılcım</span></h2>
+            <p id="cebiMesaj">Buradayım. Ne yapmak istiyorsan bana söyle.</p>
+          </div>
+          <div class="cebi-yuz" id="cebiYuz">✦</div>
         </div>
-      </form>
-      <div id="gorevler" style="margin-top:12px"></div>
-    </section>
+        <div class="cebi-durum">
+          <span id="cebiMod">Hazır</span>
+          <span id="cebiCihaz">Cihaz kontrol ediliyor…</span>
+        </div>
+        <div class="cebi-eylemler">
+          <button class="cebi-aksiyon" data-ortam="genel" data-amac="Kullanıcıya bulunduğu ortamda yardımcı ol">✦ Yanımda ol</button>
+          <button class="cebi-aksiyon" data-ortam="is" data-amac="İşimi adım adım takip et">💼 İş modu</button>
+          <button class="cebi-aksiyon" data-ortam="gezi" data-amac="Bulunduğum yeri ve gördüklerimi anlamama yardım et">🧭 Gezgin modu</button>
+        </div>
+      </section>
 
-    <section class="kart">
-      <h2>Hafıza</h2>
-      <pre class="soluk" id="hafiza" style="white-space:pre-wrap;max-height:30vh;overflow:auto;margin:0">…</pre>
-    </section>
+      <!-- HIZLI ARAMA KARTI (VoIP One-Tap Dial) -->
+      <section class="kart hizli-arama-karti">
+        <div class="baslik-satiri">
+          <div>
+            <h2>📞 Hızlı Arama (VoIP / Santral)</h2>
+            <p class="soluk alt-baslik">Terminal gerekmez; numarayı ve sesi seçip doğrudan ara.</p>
+          </div>
+          <span class="hazir-rozet" id="voipDurumRozet">● VoIP Hazır</span>
+        </div>
+        <form id="hizliAraForm">
+          <div class="izgara-2">
+            <div class="alan-grubu">
+              <label for="hizliNumara">Aranacak Numara</label>
+              <input type="tel" id="hizliNumara" placeholder="Örn: 05321234567 veya +905..." required />
+            </div>
+            <div class="alan-grubu">
+              <label for="hizliSes">Aramada Kullanılacak Ses</label>
+              <select id="hizliSes">
+                <option value="66f55da63a4a47b982ae64723dd79194">🎭 Haluk Bilginer (Klon Ses)</option>
+                <option value="4fef01e5df334bb0b1a039750058b760">🎭 Sedat Peker (Klon Ses)</option>
+                <option value="tr-TR-EmelNeural">🎙️ Doğal Kadın (Emel)</option>
+                <option value="tr-TR-AhmetNeural">🎙️ Doğal Erkek (Ahmet)</option>
+              </select>
+            </div>
+          </div>
+          <div class="alan-grubu" style="margin-top:10px">
+            <label for="hizliTalimat">Görüşme Talimatı / Amacı (İsteğe bağlı)</label>
+            <input type="text" id="hizliTalimat" placeholder="Örn: Randevu saatini teyit et veya Perşembeye ertele" />
+          </div>
+          <button class="buton birincil tam-genislik arama-butonu" type="submit" id="hizliAraBtn">
+            <span class="arama-ikon">📞</span> Şimdi Ara (VoIP Santral)
+          </button>
+        </form>
+      </section>
+
+      <!-- ASİSTAN SOHBET VE SESLİ KOMUT KARTI -->
+      <section class="kart sohbet-karti">
+        <div class="baslik-satiri">
+          <div>
+            <h2>💬 Sesli &amp; Yazılı Komut</h2>
+            <p class="soluk alt-baslik">Doğal dille konuş; arama, kontrol veya görev yaptır.</p>
+          </div>
+          <span class="hazir-rozet">● Canlı</span>
+        </div>
+        <div class="hizli-eylemler" aria-label="Hızlı işlemler">
+          <button class="hizli" data-hizli="Pili, sıcaklığı ve bağlantıyı kontrol et">🔋<span>Pil &amp; Durum</span></button>
+          <button class="hizli" data-hizli="Sesini Haluk Bilginer yap">🎭<span>Haluk Sesi</span></button>
+          <button class="hizli" data-hizli="Sesini Sedat Peker yap">🎭<span>Sedat Sesi</span></button>
+          <button class="hizli" data-hizli="Doğal sesine dön">🎙️<span>Doğal Ses</span></button>
+        </div>
+        <div class="sohbet" id="sohbet"></div>
+        <form class="satir" id="sohbetForm">
+          <button class="mikrofon" type="button" id="mikrofon" title="Konuşarak yaz / Dinle">🎙</button>
+          <input id="mesaj" placeholder="Bir şey söyle veya yaz (Örn: Haluk'u ara)..." autocomplete="off" />
+          <button class="buton birincil" type="submit" id="gonder">Gönder</button>
+        </form>
+        <div class="satir eylem-cubugu">
+          <button class="buton" id="bak">📷 Kamera Gör</button>
+          <button class="buton" id="soyle">🔊 Telefonda Konuş</button>
+          <button class="buton tehlike" id="sifirla">Temizle</button>
+        </div>
+        <p class="soluk yardim" id="sesDurumu">Mikrofon düğmesine dokunup konuş; terminal yazmak yok.</p>
+      </section>
+    </div>
+
+    <!-- TAB 2: SES TERCİHLERİ (Ses Stüdyosu & Klon Sesler) -->
+    <div id="tab-sesler" class="sekme-icerik">
+      <section class="aktif-ses-hero" id="aktifSesHero">
+        <div class="aktif-ses-sol">
+          <span class="aktif-ses-etiket">ŞU AN KULLANILAN VARSAYILAN SES</span>
+          <h2 id="aktifSesAdi">Haluk Bilginer</h2>
+          <p id="aktifSesAciklama" class="soluk">Vakur, karizmatik ve otoriter Türkçe klon ses</p>
+        </div>
+        <div class="aktif-ses-rozet" id="aktifSesRozet">Fish Audio Klon</div>
+      </section>
+
+      <section class="kart">
+        <div class="baslik-satiri">
+          <div>
+            <h2>🎭 Hazır Ses Modelleri &amp; Ön Dinleme</h2>
+            <p class="soluk alt-baslik">Herhangi bir sesi ön dinleyebilir ve tek tıkla varsayılan yapabilirsin.</p>
+          </div>
+        </div>
+        <div class="ses-izgara" id="sesKartlariIzgara">
+          <!-- Ses kartları JavaScript ile dinamik olarak doldurulur -->
+        </div>
+      </section>
+
+      <!-- YENİ ÖZEL KLON SES EKLEME FORMU -->
+      <section class="kart">
+        <div class="baslik-satiri">
+          <div>
+            <h2>➕ Yeni Özel Klon Ses Tanımla</h2>
+            <p class="soluk alt-baslik">Fish Audio üzerindeki herhangi bir modelin Voice ID'sini ekle.</p>
+          </div>
+        </div>
+        <form id="ozelSesForm">
+          <div class="izgara-2">
+            <div class="alan-grubu">
+              <label for="ozelSesId">Fish Audio Voice ID (32 haneli kod)</label>
+              <input type="text" id="ozelSesId" placeholder="Örn: 66f55da63a4a47b982ae64723dd79194" required />
+            </div>
+            <div class="alan-grubu">
+              <label for="ozelSesAdi">Ses Tanımı / Kişi Adı</label>
+              <input type="text" id="ozelSesAdi" placeholder="Örn: Kendi Sesim, Ünlü Klonu" required />
+            </div>
+          </div>
+          <div class="alan-grubu" style="margin-top:10px">
+            <label for="ozelSesAciklama">Açıklama (İsteğe bağlı)</label>
+            <input type="text" id="ozelSesAciklama" placeholder="Örn: Özel eğitimli karizmatik ton" />
+          </div>
+          <button class="buton birincil" type="submit" id="ozelSesKaydetBtn" style="margin-top:10px">
+            ➕ Sesi Stüdyoya Ekle
+          </button>
+        </form>
+      </section>
+    </div>
+
+    <!-- TAB 3: ENTEGRASYON & API (Sıfır Terminal Formu) -->
+    <div id="tab-ayarlar" class="sekme-icerik">
+      <section class="kart ayar-kart">
+        <div class="baslik-satiri">
+          <div>
+            <h2>⚙️ API &amp; Entegrasyon Merkezi</h2>
+            <p class="soluk alt-baslik">Tüm anahtarları buradan yapıştırıp kaydedebilirsin. Terminalde .env düzenlemeye son.</p>
+          </div>
+          <button class="buton birincil" id="ayarlariKaydetBtnUst" type="button">💾 Kaydet</button>
+        </div>
+
+        <form id="ayarlarFormu">
+          <!-- 1. LLM AYARLARI -->
+          <fieldset class="ayar-grubu">
+            <legend>🧠 Yapay Zekâ Beyni (LLM)</legend>
+            <div class="alan-grubu">
+              <label for="llmBaseUrl">LLM Sunucu / Base URL</label>
+              <input type="text" id="llmBaseUrl" placeholder="http://127.0.0.1:20128/v1 (9router)" />
+              <span class="ipucu">Varsayılan yerel 9router'dır (20128 portu). Doğrudan OpenAI/Groq/OpenRouter için değiştirebilirsin.</span>
+            </div>
+            <div class="alan-grubu">
+              <label for="llmApiKey">LLM API Anahtarı</label>
+              <input type="password" id="llmApiKey" placeholder="9router anahtarı (9r-...) veya sağlayıcı anahtarı" autocomplete="off" />
+              <span class="ipucu">9router panelindeki API anahtarını buraya yapıştır.</span>
+            </div>
+            <div class="izgara-2">
+              <div class="alan-grubu">
+                <label for="llmModel">Varsayılan Model</label>
+                <input type="text" id="llmModel" placeholder="Boşsa 9router otomatik seçer (ör: sonnet, llama-3.3)" />
+              </div>
+              <div class="alan-grubu">
+                <label for="groqApiKey">Groq API Anahtarı (İsteğe bağlı)</label>
+                <input type="password" id="groqApiKey" placeholder="gsk_..." autocomplete="off" />
+              </div>
+            </div>
+            <div class="alan-grubu">
+              <label for="openrouterApiKey">OpenRouter API Anahtarı (İsteğe bağlı)</label>
+              <input type="password" id="openrouterApiKey" placeholder="sk-or-v1-..." autocomplete="off" />
+            </div>
+          </fieldset>
+
+          <!-- 2. SES MOTORU AYARLARI -->
+          <fieldset class="ayar-grubu">
+            <legend>🎙️ Ses Klonlama &amp; Konuşma (TTS)</legend>
+            <div class="alan-grubu">
+              <label for="fishAudioApiKey">Fish Audio API Anahtarı (Klon Sesler İçin)</label>
+              <input type="password" id="fishAudioApiKey" placeholder="sk-fish-..." autocomplete="off" />
+              <span class="ipucu">Haluk Bilginer, Sedat Peker ve özel klon seslerin konuşması için gereklidir.</span>
+            </div>
+            <div class="izgara-2">
+              <div class="alan-grubu">
+                <label for="ttsSaglayici">Varsayılan Konuşma Motoru</label>
+                <select id="ttsSaglayici">
+                  <option value="fish_audio">Fish Audio (Klon Sesler)</option>
+                  <option value="edge-tts">Edge-TTS (Ücretsiz Doğal Türkçe)</option>
+                  <option value="piper">Piper (Cihaz içi, çevrimdışı)</option>
+                  <option value="elevenlabs">ElevenLabs (Ultra doğal)</option>
+                  <option value="android">Android Yerel TTS</option>
+                  <option value="9router">9router Audio</option>
+                </select>
+              </div>
+              <div class="alan-grubu">
+                <label for="ttsVoice">Doğal Ses Karakteri</label>
+                <select id="ttsVoice">
+                  <option value="tr-TR-EmelNeural">tr-TR-EmelNeural (Kadın)</option>
+                  <option value="tr-TR-AhmetNeural">tr-TR-AhmetNeural (Erkek)</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- 3. VOIP / SIP SANTRAL AYARLARI -->
+          <fieldset class="ayar-grubu">
+            <legend>📞 VoIP / Telefon Santrali (Zadarma / SIP)</legend>
+            <div class="izgara-2">
+              <div class="alan-grubu">
+                <label for="sipServer">SIP Sunucu Adresi</label>
+                <input type="text" id="sipServer" placeholder="pbx.zadarma.com veya sip.zadarma.com" />
+              </div>
+              <div class="alan-grubu">
+                <label for="sipUser">SIP Kullanıcı Adı / Dahili No</label>
+                <input type="text" id="sipUser" placeholder="Örn: 123456 veya 101" />
+              </div>
+            </div>
+            <div class="izgara-2">
+              <div class="alan-grubu">
+                <label for="sipPass">SIP Şifresi</label>
+                <input type="password" id="sipPass" placeholder="Santral şifresi" autocomplete="off" />
+              </div>
+              <div class="alan-grubu">
+                <label for="sipPort">SIP Port</label>
+                <input type="number" id="sipPort" placeholder="5060" />
+              </div>
+            </div>
+            <span class="ipucu">Bu bilgileri girdiğinde arka plandaki Baresip santral hesabı otomatik oluşturulur.</span>
+          </fieldset>
+
+          <!-- 4. KİŞİSEL KİMLİK AYARLARI -->
+          <fieldset class="ayar-grubu">
+            <legend>👤 Kimlik &amp; Asistan Bilgileri</legend>
+            <div class="izgara-2">
+              <div class="alan-grubu">
+                <label for="kullaniciAdi">Senin Adın (Kullanıcı)</label>
+                <input type="text" id="kullaniciAdi" placeholder="Örn: Salim Gümüş" />
+                <span class="ipucu">Asistan aramalarda "X'in kişisel asistanıyım" der.</span>
+              </div>
+              <div class="alan-grubu">
+                <label for="asistanAdiAyar">Asistanın Adı</label>
+                <input type="text" id="asistanAdiAyar" placeholder="Örn: Aspasia veya Cebimon" />
+              </div>
+            </div>
+          </fieldset>
+
+          <button class="buton birincil tam-genislik kaydet-butonu" type="submit" id="ayarlariKaydetBtn">
+            💾 Tüm Ayarları Kaydet (Yeniden Başlatma Gerekmez)
+          </button>
+        </form>
+      </section>
+    </div>
+
+    <!-- TAB 4: DURUM & GEÇMİŞ (Sağlık, Görüşmeler, Hafıza) -->
+    <div id="tab-durum" class="sekme-icerik">
+      <section class="kart">
+        <div class="baslik-satiri">
+          <h2>📊 Cihaz &amp; Sistem Sağlığı</h2>
+          <span class="hazir-rozet">● Canlı Takip</span>
+        </div>
+        <div class="izgara" id="durum">
+          <div class="rozet"><b>Beden</b><span>…</span></div>
+        </div>
+        <p class="soluk" id="agBilgi" style="margin-top:8px"></p>
+      </section>
+
+      <!-- GÖRÜŞME GÖREVLERİ -->
+      <section class="kart">
+        <div class="baslik-satiri">
+          <div>
+            <h2>📋 Görüşme Görevleri &amp; Geçmişi</h2>
+            <p class="soluk alt-baslik">Tamamlanan, devam eden ve planlanan telefon görüşmeleri.</p>
+          </div>
+        </div>
+        <form id="gorevForm">
+          <textarea id="talimat" placeholder="Örn: Diş hekimi Dr. Aylin'i ara, Perşembe 15:00 randevumu sonraki haftaya ertele."></textarea>
+          <div class="satir" style="display:flex;gap:8px;margin-top:8px">
+            <input id="numara" placeholder="Numara (+90…)" />
+            <button class="buton birincil" type="submit">Görevi Planla</button>
+          </div>
+        </form>
+        <div id="gorevler" style="margin-top:12px"></div>
+      </section>
+
+      <!-- GÖREV TAHTASI (Cebimon) -->
+      <section class="kart">
+        <div class="baslik-satiri">
+          <div>
+            <h2>🧭 Cebimon Canlı Görev Tahtası</h2>
+            <p class="soluk alt-baslik" id="cebiBaslikAciklama">Adım adım uygulamalı iş desteği.</p>
+          </div>
+          <button class="buton tehlike" id="cebiTemizle" type="button">Geçmişi temizle</button>
+        </div>
+        <form id="cebiPlanForm">
+          <textarea id="cebiTalimat" placeholder="Örn: Arabanın yağını değiştireceğim; elektrik prizini onaracağım..."></textarea>
+          <div class="satir"><button class="buton birincil" type="submit">Planı oluştur</button></div>
+        </form>
+        <div id="cebiTahta" style="margin-top:12px"></div>
+      </section>
+
+      <!-- KALICI HAFIZA -->
+      <section class="kart">
+        <h2>🧠 Kalıcı Hafıza (hafiza.md)</h2>
+        <pre class="soluk" id="hafiza" style="white-space:pre-wrap;max-height:30vh;overflow:auto;margin:0">…</pre>
+      </section>
+    </div>
   </main>
 
+  <!-- MOBİL ALT GEZİNTİ ÇUBUĞU (Fixed Bottom Bar) -->
+  <nav class="alt-nav" aria-label="Mobil gezinti çubuğu">
+    <button class="alt-sekme-btn aktif" data-sekme="kokpit">
+      <span class="alt-ikon">💬</span>
+      <span class="alt-yazi">Kokpit</span>
+    </button>
+    <button class="alt-sekme-btn" data-sekme="sesler">
+      <span class="alt-ikon">🎭</span>
+      <span class="alt-yazi">Sesler</span>
+    </button>
+    <button class="alt-sekme-btn" data-sekme="ayarlar">
+      <span class="alt-ikon">⚙️</span>
+      <span class="alt-yazi">Ayarlar</span>
+    </button>
+    <button class="alt-sekme-btn" data-sekme="durum">
+      <span class="alt-ikon">📊</span>
+      <span class="alt-yazi">Durum</span>
+    </button>
+  </nav>
+
+  <!-- CEBİMON ADIM DİYALOGU -->
   <dialog id="cebiAdimDialog" class="adim-dialog">
     <div class="kart">
       <h2>Adımı kamera ve sesle doğrula</h2>
       <p id="cebiAdimMetni"></p>
       <video id="cebiVideo" autoplay playsinline muted></video>
       <p id="cebiKayitDurumu" class="soluk">Adımı uygula, ardından kaydı başlat.</p>
-      <div class="eylemler"><button id="cebiKaydet" class="buton birincil" type="button">🎙 5 sn kaydet ve değerlendir</button><button id="cebiKapat" class="buton" type="button">Kapat</button></div>
+      <div class="eylemler">
+        <button id="cebiKaydet" class="buton birincil" type="button">🎙 5 sn kaydet ve değerlendir</button>
+        <button id="cebiKapat" class="buton" type="button">Kapat</button>
+      </div>
     </div>
   </dialog>
+
   <script src="/statik/panel.js"></script>
 </body>
 </html>

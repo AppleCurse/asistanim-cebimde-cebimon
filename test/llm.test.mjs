@@ -145,6 +145,22 @@ test('LLMIstemci.seslendir: ElevenLabs başarısız olduğunda yedek motora dü�
   }
 });
 
+test('LLMIstemci.seslendir: ikinci argüman string ise ses kimliği olarak kullanılır (gorev.ses)', async () => {
+  const orijinalFetch = globalThis.fetch;
+  let govde = null;
+  globalThis.fetch = async (url, options) => {
+    govde = JSON.parse(options.body);
+    return { ok: true, status: 200, arrayBuffer: async () => new TextEncoder().encode('x').buffer };
+  };
+  try {
+    const istemci = new LLMIstemci({ fishAudioApiKey: 'k', fishAudioVoiceId: 'varsayilan', ttsSaglayici: 'fish_audio' });
+    await istemci.seslendir('Görev sesi testi', 'gorev-sesi-789');
+    assert.equal(govde.reference_id, 'gorev-sesi-789');
+  } finally {
+    globalThis.fetch = orijinalFetch;
+  }
+});
+
 test('LLMIstemci.seslendir: Fish Audio yapılandırıldığında doğru API çağrısı yapar ve ses döner', async () => {
   const orijinalFetch = globalThis.fetch;
   let cagrilanUrl = '';

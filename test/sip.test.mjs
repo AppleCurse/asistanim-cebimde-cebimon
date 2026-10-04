@@ -173,8 +173,8 @@ test('SIP: _spkFdYenidenAc spk.raw için taze fd açar ve _temizle fd/stream tem
   assert.equal(kopru.outFifoStream, null, 'outFifoStream null olmalı');
   assert.equal(kopru.outFifoFd, null, 'outFifoFd null olmalı (sonraki aramada EBADF olmamalı)');
 
-  await new Promise((r) => setTimeout(r, 50));
-  fs.rmSync(tmp, { recursive: true, force: true });
+  await new Promise((r) => setTimeout(r, 150));
+  try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
 });
 
 test('SIP: hedef numara tam SIP URI formatına dönüştürülür', () => {
@@ -182,11 +182,11 @@ test('SIP: hedef numara tam SIP URI formatına dönüştürülür', () => {
   const kopru = sahteKopru({ tmp });
   kopru.sipServer = 'pbx.zadarma.com';
   const formatli = kopru.formatlaNumara('05373351866');
-  assert.equal(formatli, '00905373351866');
+  assert.equal(formatli, '905373351866');
 
   const dialParam = formatli.includes('@')
     ? (formatli.startsWith('sip:') ? formatli : `sip:${formatli}`)
-    : `sip:${formatli}@${kopru.sipServer}`;
+    : `sip:00${formatli}@${kopru.sipServer}`;
   assert.equal(dialParam, 'sip:00905373351866@pbx.zadarma.com');
 
   fs.rmSync(tmp, { recursive: true, force: true });

@@ -138,14 +138,109 @@ export const ARACLAR = [
   arac(
     'gorev_olustur',
     'Kullanıcı adına bir telefon görüşmesi görevi planlar: kimin aranacağı, amaç, konuşma noktaları ve sınırlar çıkarılır; görev panelde onaya düşer. Kullanıcı "X\'i ara ve ... konuş" dediğinde bunu kullan.',
-    { talimat: { type: 'string', description: 'Kullanıcının tam talimatı, isim/numara ve bağlam dahil' } },
+    {
+      talimat: { type: 'string', description: 'Kullanıcının tam talimatı, isim/numara ve bağlam dahil' },
+      ses: { type: 'string', description: 'Kullanılacak özel ses (isteğe bağlı): haluk | sedat | emel | ahmet' },
+    },
     ['talimat'],
-    async ({ talimat }, { gorevler }) => {
+    async ({ talimat, ses }, { gorevler, ayar }) => {
+      const secilenSes = sesiCoz(ses, ayar);
       const g = await gorevler.olustur(talimat, { kaynak: 'sohbet' });
-      return { metin: `Görev oluşturuldu #${g.id}: "${g.baslik}". Aranacak: ${g.kisi?.ad || '?'} (${g.kisi?.numara || 'numara yok'}). Durum: ${g.durum}. Kullanıcı paneldeki "Görüşmeyi başlat" ile onaylayınca arama yapılır.` };
+      if (secilenSes) {
+        g.ses = secilenSes.id;
+        gorevler.guncelle(g.id, { ses: secilenSes.id });
+      }
+      return { metin: `Görev oluşturuldu #${g.id}: "${g.baslik}". Aranacak: ${g.kisi?.ad || '?'} (${g.kisi?.numara || 'numara yok'}). Ses: ${secilenSes ? secilenSes.ad : 'varsayılan'}. Durum: ${g.durum}. Kullanıcı paneldeki "Görüşmeyi başlat" ile onaylayınca arama yapılır.` };
+    },
+  ),
+
+  arac(
+    'ses_sec',
+    'Asistanın ve telefon aramalarının ses modelini değiştirir. Kullanıcı "Haluk Bilginer sesine geç", "Sedat Peker sesi yap", "Doğal sese dön" dediğinde bunu kullan.',
+    { ses: { type: 'string', description: 'Seçilecek ses: "Haluk Bilginer", "Sedat Peker", "Doğal Kadın", "Doğal Erkek" veya ses kimliği' } },
+    ['ses'],
+    async ({ ses }, ctx) => {
+      const { ayar, llm } = ctx;
+      const bulunan = sesiCoz(ses, ayar);
+      if (!bulunan) throw new Error(`Ses bulunamadı: "${ses}". Seçenekler: Haluk Bilginer, Sedat Peker, Doğal Kadın (Emel), Doğal Erkek (Ahmet)`);
+      if (bulunan.tur === 'fish_audio') {
+        ayar.beyin.tts = 'fish_audio';
+        ayar.beyin.llm.fishAudioVoiceId = bulunan.id;
+        if (llm) {
+          llm.ttsSaglayici = 'fish_audio';
+          llm.fishAudioVoiceId = bulunan.id;
+        }
+      } else {
+        ayar.beyin.tts = bulunan.tur || 'edge-tts';
+        ayar.beyin.llm.ttsVoice = bulunan.id;
+        if (llm) {
+          llm.ttsSaglayici = ayar.beyin.tts;
+          llm.ttsVoice = bulunan.id;
+        }
+      }
+      return { metin: `Ses başarıyla değiştirildi: ${bulunan.ad} (${bulunan.etiket}) artık aktif.` };
+    },
+  ),
+
+  arac(
+    'hizli_ara',
+    'Belirtilen telefon numarasını seçilen ses modeliyle VoIP üzerinden doğrudan arar. Kullanıcı "Haluk Bilginer sesiyle X\'i ara" dediğinde bunu kullan.',
+    {
+      numara: { type: 'string', description: 'Aranacak telefon numarası (+90... veya 05...)' },
+      ses: { type: 'string', description: 'Kullanılacak ses (isteğe bağlı): haluk, sedat, emel, ahmet' },
+      talimat: { type: 'string', description: 'Görüşmenin amacı ve talimatı' },
+      acilis: { type: 'string', description: 'İlk karşılama cümlesi' },
+    },
+    ['numara'],
+    async ({ numara, ses, talimat, acilis }, ctx) => {
+      const secilenSes = sesiCoz(ses, ctx.ayar);
+      const sesId = secilenSes ? secilenSes.id : (ctx.ayar.beyin.tts === 'fish_audio' ? ctx.ayar.beyin.llm.fishAudioVoiceId : ctx.ayar.beyin.llm.ttsVoice);
+      const sesAdi = secilenSes ? secilenSes.ad : 'varsayılan ses';
+
+      const g = await ctx.gorevler.olustur(talimat || `${numara} ile görüşme`, {
+        numara,
+        kaynak: 'hizli_ara',
+      });
+      if (sesId) g.ses = sesId;
+      if (acilis) g.acilis = acilis;
+
+      if (ctx.sipKoprusu) {
+        await ctx.sipKoprusu.ara({ gorev: g, numara });
+        ctx.gorevler.guncelle(g.id, { durum: 'araniyor', mod: 'voip' });
+        return { metin: `VoIP araması başlatıldı #${g.id}: ${numara} aranıyor. Kullanılan ses: ${sesAdi}.` };
+      }
+
+      return { metin: `Arama görevi oluşturuldu #${g.id}. Kullanılacak ses: ${sesAdi}. Durum: ${g.durum}.` };
     },
   ),
 ];
+
+export const HAZIR_SESLER = [
+  { id: '66f55da63a4a47b982ae64723dd79194', ad: 'Haluk Bilginer', tur: 'fish_audio', kategori: 'klon', etiket: 'Klon Ses', aciklama: 'Vakur, karizmatik ve otoriter Türkçe ses tonu' },
+  { id: '4fef01e5df334bb0b1a039750058b760', ad: 'Sedat Peker', tur: 'fish_audio', kategori: 'klon', etiket: 'Klon Ses', aciklama: 'Özgün tonlama ve vurgulara sahip Türkçe klon ses' },
+  { id: 'tr-TR-EmelNeural', ad: 'Doğal Kadın (Emel)', tur: 'edge-tts', kategori: 'dogal', etiket: 'Doğal Ses', aciklama: 'Akıcı, sıcak ve net Türkçe kadın asistan sesi' },
+  { id: 'tr-TR-AhmetNeural', ad: 'Doğal Erkek (Ahmet)', tur: 'edge-tts', kategori: 'dogal', etiket: 'Doğal Ses', aciklama: 'Dengeli, sakin Türkçe erkek asistan sesi' },
+];
+
+export function sesiCoz(giris, ayar = {}) {
+  if (!giris) return null;
+  const s = String(giris).toLowerCase().trim();
+  if (s.includes('haluk')) return HAZIR_SESLER[0];
+  if (s.includes('sedat') || s.includes('peker')) return HAZIR_SESLER[1];
+  if (s.includes('emel') || s.includes('kadin') || s.includes('kadın')) return HAZIR_SESLER[2];
+  if (s.includes('ahmet') || s.includes('erkek')) return HAZIR_SESLER[3];
+  for (const oz of (ayar.ozelSesler || [])) {
+    if (oz.id === giris || oz.ad?.toLowerCase().includes(s)) {
+      return { ...oz, tur: oz.tur || 'fish_audio' };
+    }
+  }
+  const tam = HAZIR_SESLER.find((x) => x.id.toLowerCase() === s);
+  if (tam) return tam;
+  if (/^[0-9a-f]{32}$/i.test(giris)) {
+    return { id: giris, ad: 'Özel Klon Ses', tur: 'fish_audio', kategori: 'klon', etiket: 'Klon Ses', aciklama: 'Özel Fish Audio ses modeli' };
+  }
+  return null;
+}
 
 export const ARAC_TANIMLARI = ARACLAR.map((a) => a.tanim);
 

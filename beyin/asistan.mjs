@@ -8,13 +8,14 @@ import { SOHBET_DIZINI } from '../ortak/ayar.mjs';
 const MAKS_MESAJ = 40;
 
 export class Asistan {
-  constructor({ llm, beden, ayar, hafiza, gorevler, cebimon, log }) {
+  constructor({ llm, beden, ayar, hafiza, gorevler, cebimon, sipKoprusu, log }) {
     this.llm = llm;
     this.beden = beden;
     this.ayar = ayar;
     this.hafiza = hafiza;
     this.gorevler = gorevler;
     this.cebimon = cebimon;
+    this.sipKoprusu = sipKoprusu;
     this.log = log;
     this.oturumlar = new Map();
   }
@@ -77,7 +78,7 @@ ${hafiza || '(henüz boş)'}`;
     this._gunluk(oturumId, { rol: 'user', metin: kullaniciMetni });
 
     const adimlar = [];
-    const ctx = { beden: this.beden, llm: this.llm, hafiza: this.hafiza, gorevler: this.gorevler, cebimon: this.cebimon, ayar: this.ayar, log: this.log };
+    const ctx = { beden: this.beden, llm: this.llm, hafiza: this.hafiza, gorevler: this.gorevler, cebimon: this.cebimon, sipKoprusu: this.sipKoprusu, ayar: this.ayar, log: this.log };
     let toplamKullanim = { prompt_tokens: 0, completion_tokens: 0 };
     let sonMetin = '';
 

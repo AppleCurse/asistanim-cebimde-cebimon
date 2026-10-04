@@ -474,3 +474,71 @@ test('voip-ara: ses testi yeşil değilken arama ÇALDIRILMAZ (423)', async () =
   const { veri: taze } = await api(`/gorevler/${g.id}`);
   assert.notEqual(taze.durum, 'araniyor', 'kapı kapalıyken görev araniyor olmamalı');
 });
+
+test('GET /api/ayarlar mevcut yapılandırmayı döner', async () => {
+  const { durum, veri } = await api('/ayarlar');
+  assert.equal(durum, 200);
+  assert.ok(veri.kullanici);
+  assert.ok(veri.llm);
+  assert.ok(veri.ses);
+  assert.ok(veri.sip);
+});
+
+test('POST /api/ayarlar ayarları günceller ve kaydeder', async () => {
+  const { durum, veri } = await api('/ayarlar', {
+    kullanici: { ad: 'Salim Gümüş', asistanAdi: 'Cebimon' },
+    llm: { apiKey: 'sk-yeni-test-key', model: 'yeni-model' },
+    ses: { fishAudioApiKey: 'sk-fish-yeni-key', ttsSaglayici: 'fish_audio' },
+    sip: { sunucu: 'sip.zadarma.com', kullanici: '123456', sifre: 'gizli123' },
+  });
+  assert.equal(durum, 200);
+  assert.equal(veri.tamam, true);
+  const { veri: taze } = await api('/ayarlar');
+  assert.equal(taze.kullanici.ad, 'Salim Gümüş');
+  assert.equal(taze.kullanici.asistanAdi, 'Cebimon');
+  assert.equal(taze.llm.apiKey, 'sk-yeni-test-key');
+  assert.equal(taze.llm.model, 'yeni-model');
+  assert.equal(taze.ses.fishAudioApiKey, 'sk-fish-yeni-key');
+  assert.equal(taze.sip.kullanici, '123456');
+});
+
+test('GET /api/sesler hazır ve aktif sesleri listeler', async () => {
+  const { durum, veri } = await api('/sesler');
+  assert.equal(durum, 200);
+  assert.ok(veri.aktif);
+  assert.ok(Array.isArray(veri.sesler));
+  assert.ok(veri.sesler.some((s) => s.ad === 'Haluk Bilginer'));
+  assert.ok(veri.sesler.some((s) => s.ad === 'Sedat Peker'));
+});
+
+test('POST /api/ses/varsayilan-yap varsayılan sesi değiştirir', async () => {
+  const { durum, veri } = await api('/ses/varsayilan-yap', { sesId: '66f55da63a4a47b982ae64723dd79194', tur: 'fish_audio', ad: 'Haluk Bilginer' });
+  assert.equal(durum, 200);
+  assert.equal(veri.tamam, true);
+  assert.equal(veri.aktif.tur, 'fish_audio');
+  assert.equal(veri.aktif.id, '66f55da63a4a47b982ae64723dd79194');
+});
+
+test('POST /api/ses/ozel-ekle yeni ses tanımlar', async () => {
+  const { durum, veri } = await api('/ses/ozel-ekle', { id: '11223344556677889900aabbccddeeff', ad: 'Test Klon', aciklama: 'Açıklama' });
+  assert.equal(durum, 200);
+  assert.equal(veri.tamam, true);
+  assert.equal(veri.ses.ad, 'Test Klon');
+  const { veri: liste } = await api('/sesler');
+  assert.ok(liste.ozelSesler.some((s) => s.ad === 'Test Klon'));
+});
+
+test('POST /api/hizli-ara VoIP aramasını seçilen sesle tetikler (kapı testi uyarısı dahil)', async () => {
+  const { durum, veri } = await api('/hizli-ara', { numara: '05321234567', ses: 'haluk', talimat: 'Hızlı arama testi' });
+  assert.equal(durum, 423);
+  assert.match(veri.hata, /ses testi/);
+});
+
+test('arac: ses_sec asistan sesini başarıyla değiştirir', async () => {
+  const { aracBul } = await import('../beyin/araclar.mjs');
+  const arac = aracBul('ses_sec');
+  assert.ok(arac);
+  const sonuc = await arac.calistir({ ses: 'Sedat Peker' }, { ayar: beyin.asistan.ayar, llm: beyin.llm });
+  assert.match(sonuc.metin, /Sedat Peker/);
+});
+
